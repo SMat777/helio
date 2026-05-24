@@ -1,0 +1,322 @@
+import { useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { AppShell } from '../ui/AppShell'
+import { Card } from '../ui/Card'
+import { KPI } from '../ui/KPI'
+import { Pill } from '../ui/Pill'
+import { Button } from '../ui/Button'
+import { Icon } from '../ui/Icon'
+import { Flag } from '../ui/Flag'
+import { Tabs, type Tab } from '../ui/Tabs'
+import { RiskScore } from '../ui/RiskScore'
+import { Sparkline } from '../ui/Sparkline'
+import { AreaChart } from '../ui/AreaChart'
+import { SectionHead } from '../ui/SectionHead'
+import { riskBand, riskColor } from '../lib/risk'
+import { getSupplier, type Supplier } from '../lib/data'
+
+// Detail tabs — 7 fixed, in HANDOFF §3 order (kilde: V5Tabs).
+const TABS: Tab[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'scorecard', label: 'Scorecard' },
+  { id: 'contracts', label: 'Contracts' },
+  { id: 'ncrs', label: 'NCRs' },
+  { id: 'contacts', label: 'Contacts' },
+  { id: 'documents', label: 'Documents' },
+  { id: 'activity', label: 'Activity' },
+]
+
+type Tone = 'good' | 'warn' | 'bad'
+
+// Derive a sensible tone from a metric — local to the detail screen, not a global rule.
+function qualityTone(pct: number): Tone {
+  if (pct >= 92) return 'good'
+  if (pct >= 85) return 'warn'
+  return 'bad'
+}
+function onTimeTone(pct: number): Tone {
+  if (pct >= 95) return 'good'
+  if (pct >= 90) return 'warn'
+  return 'bad'
+}
+function ncrTone(n: number): Tone {
+  if (n === 0) return 'good'
+  if (n === 1) return 'warn'
+  return 'bad'
+}
+
+const toneVar: Record<Tone, string> = { good: 'var(--good)', warn: 'var(--warn)', bad: 'var(--bad)' }
+const toneText: Record<Tone, string> = { good: 'text-good', warn: 'text-warn', bad: 'text-bad' }
+
+// One scorecard signal card (kilde: V5Signal) — label · big value · sparkline · tone.
+function SignalCard({ label, value, note, tone, data }: {
+  label: string
+  value: string
+  note: string
+  tone: Tone
+  data: number[]
+}) {
+  return (
+    <Card flat className="flex flex-col px-5 pt-4 pb-4">
+      <div className="mb-2 flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">
+        <span>{label}</span>
+        <Pill tone={tone} dot>{tone === 'good' ? 'OK' : tone === 'warn' ? 'Watch' : 'Risk'}</Pill>
+      </div>
+      <div className="font-serif text-[34px] leading-none tracking-[-0.02em] tabular-nums">{value}</div>
+      <div className="mt-3 h-[36px] opacity-90">
+        <Sparkline data={data} color={toneVar[tone]} height={36} />
+      </div>
+      <div className={`mt-2 font-mono text-[11px] ${toneText[tone]}`}>{note}</div>
+    </Card>
+  )
+}
+
+// Lightweight "not designed yet" panel for the five unbuilt tabs.
+function PlaceholderPanel({ label }: { label: string }) {
+  return (
+    <Card flat className="grid min-h-[200px] place-items-center px-6 py-12">
+      <div className="text-center">
+        <div className="mb-2 inline-grid h-9 w-9 place-items-center rounded-lg border border-line bg-paper text-ink-3">
+          <Icon name="doc" size={16} />
+        </div>
+        <div className="text-[13.5px] font-medium text-ink">{label}</div>
+        <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-ink-3">Designet ikke færdigt</div>
+      </div>
+    </Card>
+  )
+}
+
+function NotFound() {
+  return (
+    <AppShell
+      slim
+      crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; not found</>}
+    >
+      <div className="px-6 py-4">
+        <Card flat className="grid min-h-[260px] place-items-center px-6 py-16">
+          <div className="text-center">
+            <div className="mb-3 inline-grid h-10 w-10 place-items-center rounded-lg border border-line bg-paper text-ink-3">
+              <Icon name="warn" size={18} />
+            </div>
+            <div className="font-serif text-[22px] leading-tight tracking-[-0.015em]">Supplier not found</div>
+            <div className="mt-1.5 text-[12.5px] text-ink-2">We couldn't find a supplier with that id.</div>
+            <Link to="/suppliers" className="mt-5 inline-flex items-center gap-1.5 rounded-md border border-line bg-card px-2.5 py-1.5 text-[12.5px] font-medium text-ink no-underline hover:bg-hover">
+              <Icon name="back" /> Back to suppliers
+            </Link>
+          </div>
+        </Card>
+      </div>
+    </AppShell>
+  )
+}
+
+// One eyebrow + value cell in the header stat strip (kilde: V5 metric tiles).
+function HeaderStat({ label, value, unit, delta, tone, last }: {
+  label: string
+  value: string
+  unit?: string
+  delta?: string
+  tone?: Tone
+  last?: boolean
+}) {
+  return (
+    <div className={`px-5 ${last ? '' : 'border-r border-line-2'}`}>
+      <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">{label}</div>
+      <div className="font-serif text-[26px] leading-none tracking-[-0.02em] tabular-nums">
+        {value}
+        {unit && <span className="ml-0.5 font-sans text-[13px] text-ink-3">{unit}</span>}
+      </div>
+      {delta && <div className={`mt-1.5 font-mono text-[11px] ${tone ? toneText[tone] : 'text-ink-3'}`}>{delta}</div>}
+    </div>
+  )
+}
+
+function OverviewTab({ s }: { s: Supplier }) {
+  const qTone = qualityTone(s.qualityPct)
+  const otTone = onTimeTone(s.onTimePct)
+  const nTone = ncrTone(s.ncrs)
+  return (
+    <div className="flex flex-col gap-3">
+      {/* KPI tiles */}
+      <Card flat className="grid grid-cols-4">
+        <div className="border-r border-line">
+          <KPI label="Scorecard" value={s.scorecard} unit="/100" note="composite" />
+        </div>
+        <div className="border-r border-line">
+          <KPI label="On-time" value={s.onTimePct} unit="%" note="90d" />
+        </div>
+        <div className="border-r border-line">
+          <KPI label="Quality" value={s.qualityPct} unit="/100" note="90d" />
+        </div>
+        <div>
+          <KPI label="Open NCRs" value={s.ncrs} note="active" />
+        </div>
+      </Card>
+
+      {/* Risk over time */}
+      <Card flat className="px-5 pt-4 pb-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h3 className="m-0 text-[13px] font-semibold tracking-[-0.005em]">
+            Risk over time <span className="ml-2 font-mono text-[11px] font-normal text-ink-3">last 90 days</span>
+          </h3>
+          <span className="font-mono text-[11px] text-ink-3">12-point trend</span>
+        </div>
+        <AreaChart data={s.trend} color={riskColor(s.riskScore)} height={180} labels={['90d', '60d', '30d', 'now']} />
+      </Card>
+
+      {/* Summary line */}
+      <Card flat className="px-5 py-4">
+        <SectionHead>Summary</SectionHead>
+        <p className="m-0 max-w-[68ch] text-[13px] leading-[1.6] text-ink-2">
+          {s.name} is a <b className="font-medium text-ink">{s.segment.toLowerCase()}</b> supplier in {s.category}, currently scoring{' '}
+          <b className="font-medium" style={{ color: riskColor(s.riskScore) }}>{s.riskScore}</b> on risk
+          {' '}(<span style={{ color: riskColor(s.riskScore) }}>{riskBand(s.riskScore)}</span>).
+          {' '}On-time delivery sits at <b className={`font-medium ${toneText[otTone]}`}>{s.onTimePct}%</b> and quality at{' '}
+          <b className={`font-medium ${toneText[qTone]}`}>{s.qualityPct}/100</b>, with{' '}
+          <b className={`font-medium ${toneText[nTone]}`}>{s.ncrs} open NCR{s.ncrs === 1 ? '' : 's'}</b>.
+          {s.reason ? <> Latest flag: {s.reason.toLowerCase()}.</> : null}
+        </p>
+      </Card>
+    </div>
+  )
+}
+
+function ScorecardTab({ s }: { s: Supplier }) {
+  // Three signals mirror V5Signal: Quality, On-time, NCRs. Sparklines reuse the
+  // composite trend (only 12-point series the data layer exposes today).
+  const qTone = qualityTone(s.qualityPct)
+  const otTone = onTimeTone(s.onTimePct)
+  const nTone = ncrTone(s.ncrs)
+  return (
+    <div className="flex flex-col gap-3">
+      <Card flat className="px-5 pt-4 pb-4">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">Composite risk · 30d</div>
+            <div className="flex items-baseline gap-3.5">
+              <div className="font-serif text-[72px] leading-[0.9] tabular-nums" style={{ color: riskColor(s.riskScore) }}>{s.riskScore}</div>
+              {s.change && s.change !== '0' && (
+                <div className="font-mono text-[13px]" style={{ color: riskColor(s.riskScore) }}>↗ {s.change} vs. 30d</div>
+              )}
+            </div>
+            <div className="mt-2.5 max-w-[42ch] text-[13px] leading-[1.5] text-ink-2">
+              Risk band <b className="font-medium" style={{ color: riskColor(s.riskScore) }}>{riskBand(s.riskScore)}</b>.
+              {' '}Composite of on-time, quality and open NCRs.
+            </div>
+          </div>
+          <div className="w-[180px] opacity-90">
+            <Sparkline data={s.trend} color={riskColor(s.riskScore)} height={64} />
+            <div className="mt-1.5 flex justify-between font-mono text-[10px] text-ink-3">
+              <span>90d</span><span>60d</span><span>30d</span><span>now</span>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <SectionHead>Signals</SectionHead>
+      <div className="grid grid-cols-3 gap-3">
+        <SignalCard
+          label="Quality"
+          value={`${s.qualityPct}`}
+          note={qTone === 'good' ? 'On target' : qTone === 'warn' ? 'Below target' : 'Quality decline'}
+          tone={qTone}
+          data={s.trend}
+        />
+        <SignalCard
+          label="On-time"
+          value={`${s.onTimePct}%`}
+          note={otTone === 'good' ? 'On target' : otTone === 'warn' ? 'Slipping' : 'Late deliveries'}
+          tone={otTone}
+          data={s.trend}
+        />
+        <SignalCard
+          label="NCRs"
+          value={`${s.ncrs}`}
+          note={nTone === 'good' ? 'None open' : `${s.ncrs} open · needs review`}
+          tone={nTone}
+          data={s.trend}
+        />
+      </div>
+    </div>
+  )
+}
+
+export default function SupplierDetail() {
+  const { id = '' } = useParams()
+  const supplier = getSupplier(id)
+  const [active, setActive] = useState('overview')
+
+  if (!supplier) return <NotFound />
+  const s = supplier
+
+  const band = riskBand(s.riskScore)
+  const qTone = qualityTone(s.qualityPct)
+  const otTone = onTimeTone(s.onTimePct)
+
+  return (
+    <AppShell
+      slim
+      crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; {s.id}</>}
+      actions={
+        <>
+          <Button><Icon name="export" /> Export</Button>
+          <Button variant="primary">Open NCR</Button>
+        </>
+      }
+    >
+      <div className="px-6 py-4">
+        {/* Back link */}
+        <Link to="/suppliers" className="mb-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-ink-3 no-underline hover:text-ink">
+          <Icon name="back" size={13} /> Back to suppliers
+        </Link>
+
+        {/* Header block */}
+        <Card flat className="mb-3 px-5 pt-5 pb-4">
+          <div className="flex items-start gap-[18px]">
+            <div className="grid h-[54px] w-[54px] flex-none place-items-center rounded-[10px] border border-line bg-paper-2 font-serif text-[26px] text-ink-2">
+              {s.name.charAt(0)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1.5 font-mono text-[11px] tracking-[0.04em] text-ink-3">
+                <Flag code={s.country} />{s.id} · {s.category}
+              </div>
+              <h1 className="m-0 font-serif text-[28px] leading-none tracking-[-0.02em]">{s.name}</h1>
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <Pill tone="outline">{s.segment}</Pill>
+                <Pill tone="outline">Tier {s.tier}</Pill>
+                {s.ncrs > 0 && <Pill tone={s.ncrs > 1 ? 'bad' : 'warn'} dot>{s.ncrs} open NCR{s.ncrs === 1 ? '' : 's'}</Pill>}
+                <Pill tone={band === 'Critical' ? 'bad' : band === 'Elevated' ? 'warn' : band === 'Watch' ? 'muted' : 'good'} dot>{band}</Pill>
+              </div>
+            </div>
+            {/* Risk score block */}
+            <div className="w-[200px] flex-none">
+              <div className="mb-2 text-right font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">Risk score</div>
+              <RiskScore score={s.riskScore} />
+              <div className="mt-1.5 text-right text-[12px] font-medium" style={{ color: riskColor(s.riskScore) }}>{band}</div>
+            </div>
+          </div>
+
+          {/* Header stat strip */}
+          <div className="mt-4 grid grid-cols-4 border-t border-line pt-4">
+            <HeaderStat label="Scorecard" value={String(s.scorecard)} unit="/100" />
+            <HeaderStat label="On-time" value={`${s.onTimePct}%`} delta={`${s.onTimePct >= 95 ? 'on target' : 'below target'}`} tone={otTone} />
+            <HeaderStat label="Quality" value={String(s.qualityPct)} unit="/100" delta={`${s.qualityPct >= 92 ? 'on target' : 'below target'}`} tone={qTone} />
+            <HeaderStat label="Spend YTD" value={s.spend} last />
+          </div>
+        </Card>
+
+        {/* Tabs */}
+        <Tabs tabs={TABS} active={active} onChange={setActive} className="mb-3" />
+
+        {/* Tab panels */}
+        {active === 'overview' && <OverviewTab s={s} />}
+        {active === 'scorecard' && <ScorecardTab s={s} />}
+        {active === 'contracts' && <PlaceholderPanel label="Contracts" />}
+        {active === 'ncrs' && <PlaceholderPanel label="NCRs" />}
+        {active === 'contacts' && <PlaceholderPanel label="Contacts" />}
+        {active === 'documents' && <PlaceholderPanel label="Documents" />}
+        {active === 'activity' && <PlaceholderPanel label="Activity" />}
+      </div>
+    </AppShell>
+  )
+}
