@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+apps/web/dist/
+
+# env / secrets
+.env
+.env.*
+
+# OS
+.DS_Store
+
+# internal — local only, never tracked (per CLAUDE.md + git-ownership)
+learning/
+docs/
+design/
+CONTEXT.md
+CLAUDE_CODE_PROMPT.md
