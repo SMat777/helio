@@ -5,6 +5,8 @@ import Suppliers from './screens/Suppliers'
 import SupplierDetail from './screens/SupplierDetail'
 import NewNcr from './screens/NewNcr'
 import Ncrs from './screens/Ncrs'
+import Categories from './screens/Categories'
+import Scorecards from './screens/Scorecards'
 import Placeholder from './screens/Placeholder'
 import Showcase from './screens/Showcase'
 
@@ -34,10 +36,10 @@ export default function App() {
         <Route path="/suppliers/:id" element={<SupplierDetail />} />
         <Route path="/ncr/new" element={<NewNcr />} />
         <Route path="/ncrs" element={<Ncrs />} />
-        <Route path="/categories" element={<Placeholder title="Categories" />} />
+        <Route path="/categories" element={<Categories />} />
         <Route path="/contracts" element={<Placeholder title="Contracts" />} />
         <Route path="/insights" element={<Placeholder title="Insights" />} />
-        <Route path="/scorecards" element={<Placeholder title="Scorecards" />} />
+        <Route path="/scorecards" element={<Scorecards />} />
         <Route path="/esg" element={<Placeholder title="ESG" />} />
         <Route path="/spend" element={<Placeholder title="Spend" />} />
         <Route path="/showcase" element={<Showcase />} />
