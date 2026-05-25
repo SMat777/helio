@@ -2,14 +2,6 @@
 
 export type Band = { label: string; range: string; n: number; color: string }
 
-// Default band colours per HANDOFF §7 bands (Watch is neutral grey, not a semantic).
-export const DEFAULT_BANDS_COLORS: Record<string, string> = {
-  Low: 'var(--good)',
-  Watch: 'var(--ink-4)',
-  Elevated: 'var(--warn)',
-  Critical: 'var(--bad)',
-}
-
 export function RiskBand({ bands, compact = false }: { bands: Band[]; compact?: boolean }) {
   const total = bands.reduce((s, b) => s + b.n, 0) || 1
   return (
