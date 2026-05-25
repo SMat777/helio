@@ -8,12 +8,7 @@ import { PageHead } from '../ui/PageHead'
 import { HBarRow, HBarGroup } from '../ui/HBarRow'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { getSpendBreakdown, type SpendByKey } from '../lib/data'
-
-function fmtMoney(eur: number): string {
-  if (eur >= 1_000_000) return `€${(eur / 1_000_000).toFixed(1)}M`
-  if (eur >= 1_000) return `€${Math.round(eur / 1_000)}k`
-  return `€${eur}`
-}
+import { fmtMoney } from '../lib/format'
 
 // Normalise bar widths to the largest item so the group fills the track.
 function bars(items: SpendByKey[], max: number) {

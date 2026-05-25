@@ -13,6 +13,7 @@ import { SegmentToggle, type SegOption } from '../ui/SegmentToggle'
 import { riskBand, riskColor, type RiskBand } from '../lib/risk'
 import { getSuppliers, type Supplier, type Segment } from '../lib/data'
 import { toCsv, downloadCsv } from '../lib/csv'
+import { fmtMoneyM } from '../lib/format'
 
 // View modes for the SegmentToggle (kilde: V6ViewToggle).
 type ViewMode = 'matrix' | 'table' | 'cards'
@@ -44,12 +45,6 @@ const SEGMENT_SUB: Record<Segment, string> = {
   Bottleneck: 'Low spend · High risk',
   Leverage: 'High spend · Low risk',
   Routine: 'Low spend · Low risk',
-}
-
-// "€48.2M" style — millions, one decimal (segment totals come as raw EUR).
-const eur = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-function fmtSpendM(spendEur: number): string {
-  return `€${eur.format(spendEur / 1e6)}M`
 }
 
 // ── Matrix view ─────────────────────────────────────────────────────────────
@@ -90,7 +85,7 @@ function MatrixColumn({ segment, rows }: { segment: Segment; rows: Supplier[] })
         </div>
         <div className="mb-2.5 font-mono text-[10.5px] tracking-[0.04em] text-ink-3">{SEGMENT_SUB[segment]}</div>
         <div className="flex items-baseline justify-between gap-2">
-          <span className="font-mono text-[12px] font-medium tabular-nums text-ink">{fmtSpendM(spendEur)}</span>
+          <span className="font-mono text-[12px] font-medium tabular-nums text-ink">{fmtMoneyM(spendEur)}</span>
           <span className="font-mono text-[10.5px] tabular-nums" style={{ color: riskColor(avgRisk) }}>
             avg {avgRisk}
           </span>

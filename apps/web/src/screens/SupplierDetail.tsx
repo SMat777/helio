@@ -16,6 +16,7 @@ import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { ActivityFeed } from '../ui/ActivityFeed'
 import { riskBand, riskColor } from '../lib/risk'
 import { toCsv, downloadCsv } from '../lib/csv'
+import { fmtMoney } from '../lib/format'
 import {
   getSupplier,
   getContracts,
@@ -33,13 +34,6 @@ function exportSupplier(s: Supplier) {
   const headers = ['ID', 'Name', 'Country', 'Category', 'Segment', 'Tier', 'Scorecard', 'Risk', 'OnTime%', 'Quality', 'OpenNCRs', 'SpendEUR']
   const row = [s.id, s.name, s.country, s.category, s.segment, s.tier, s.scorecard, s.riskScore, s.onTimePct, s.qualityPct, s.ncrs, s.spendEur]
   downloadCsv(`helio-${s.id}.csv`, toCsv(headers, [row]))
-}
-
-// Compact euro formatting — "€1.2M" / "€340k" / "€8,000".
-function fmtMoney(eur: number): string {
-  if (eur >= 1_000_000) return `€${(eur / 1_000_000).toFixed(1)}M`
-  if (eur >= 1_000) return `€${Math.round(eur / 1_000)}k`
-  return `€${eur.toLocaleString('en-US')}`
 }
 
 function fmtSize(kb: number): string {

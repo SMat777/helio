@@ -6,12 +6,7 @@ import { PageHead } from '../ui/PageHead'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { riskColor } from '../lib/risk'
 import { getCategoryRisk, getSpendBreakdown, getSuppliers } from '../lib/data'
-
-function fmtMoney(eur: number): string {
-  if (eur >= 1_000_000) return `€${(eur / 1_000_000).toFixed(1)}M`
-  if (eur >= 1_000) return `€${Math.round(eur / 1_000)}k`
-  return `€${eur}`
-}
+import { fmtMoney } from '../lib/format'
 
 export default function Categories() {
   const rows = useMemo(() => {

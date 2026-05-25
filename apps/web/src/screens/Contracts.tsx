@@ -8,18 +8,13 @@ import { SectionHead } from '../ui/SectionHead'
 import { PageHead } from '../ui/PageHead'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { getContracts, getSupplier, type Contract } from '../lib/data'
+import { fmtMoney } from '../lib/format'
 
 const statusTone: Record<Contract['status'], 'good' | 'warn' | 'bad' | 'muted'> = {
   active: 'good',
   expiring: 'warn',
   expired: 'bad',
   draft: 'muted',
-}
-
-function fmtMoney(eur: number): string {
-  if (eur >= 1_000_000) return `€${(eur / 1_000_000).toFixed(1)}M`
-  if (eur >= 1_000) return `€${Math.round(eur / 1_000)}k`
-  return `€${eur}`
 }
 
 export default function Contracts() {

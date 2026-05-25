@@ -9,6 +9,7 @@ import { Icon } from '../ui/Icon'
 import { PageHead } from '../ui/PageHead'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { getNcrs, getSupplier, type NcrRow } from '../lib/data'
+import { fmtMoney } from '../lib/format'
 
 const severityTone: Record<NcrRow['severity'], 'bad' | 'warn' | 'muted'> = {
   critical: 'bad',
@@ -22,12 +23,6 @@ const statusTone: Record<NcrRow['status'], 'bad' | 'warn' | 'muted' | 'good'> = 
   closed: 'good',
 }
 const sevRank: Record<NcrRow['severity'], number> = { critical: 0, major: 1, minor: 2 }
-
-function fmtMoney(eur: number): string {
-  if (eur >= 1_000_000) return `€${(eur / 1_000_000).toFixed(1)}M`
-  if (eur >= 1_000) return `€${Math.round(eur / 1_000)}k`
-  return `€${eur.toLocaleString('en-US')}`
-}
 
 export default function Ncrs() {
   const { open, closedCount, critical, dueSoon } = useMemo(() => {
