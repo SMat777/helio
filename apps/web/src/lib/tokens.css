@@ -22,10 +22,16 @@
   --line-2: oklch(0.92 0.012 75);
   --line-3: oklch(0.85 0.012 250);
 
-  /* Accent — Navy (locked default) */
+  /* Accent — Navy (structural / data) */
   --accent:     oklch(0.48 0.14 252);
   --accent-2:   oklch(0.92 0.04 252);
   --accent-ink: oklch(0.32 0.10 252);
+
+  /* CTA — warm terracotta. Distinct from the navy structure so the primary
+     action reads as "act here". AA with white text. */
+  --cta:     oklch(0.54 0.15 44);
+  --cta-2:   oklch(0.93 0.05 55);
+  --cta-ink: #ffffff;
 
   /* Semantic */
   --good: oklch(0.50 0.10 145);  --good-bg: oklch(0.94 0.04 145);
@@ -56,6 +62,10 @@
   --color-accent-2:   var(--accent-2);
   --color-accent-ink: var(--accent-ink);
 
+  --color-cta:     var(--cta);
+  --color-cta-2:   var(--cta-2);
+  --color-cta-ink: var(--cta-ink);
+
   --color-good:    var(--good);    --color-good-bg: var(--good-bg);
   --color-warn:    var(--warn);    --color-warn-bg: var(--warn-bg);
   --color-bad:     var(--bad);     --color-bad-bg:  var(--bad-bg);
@@ -63,12 +73,21 @@
 
 /* ── Fonts + type scale — no runtime override, declared directly ──────── */
 @theme {
-  --font-sans:  "IBM Plex Sans", system-ui, sans-serif;
+  --font-sans:  "Inter", system-ui, sans-serif;
   --font-mono:  "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  /* Display face (geometric sans). Kept under --font-serif for token stability
+     across the codebase — it now carries Outfit, not a serif. */
+  --font-serif: "Outfit", system-ui, sans-serif;
 
-  --text-kpi:      30px;
-  --text-kpi-hero: 56px;
+  --text-kpi:      36px;
+  --text-kpi-hero: 64px;
+}
+
+/* The display face reads as confident only with weight behind it. Set a 600
+   default for every display element; components that set an explicit weight
+   still win because utilities cascade after the base layer. */
+@layer base {
+  .font-serif { font-weight: 600; }
 }
 
 /* ── Body defaults — HANDOFF §2 ──────────────────────────────────────── */

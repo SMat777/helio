@@ -27,13 +27,13 @@ export function KPI({ label, value, unit, delta, dir = 'flat', note, hero = fals
       <div
         className={
           hero
-            ? 'font-serif text-kpi-hero font-normal leading-none tracking-[-0.02em] tabular-nums'
-            : 'text-kpi font-medium leading-none tracking-[-0.02em] tabular-nums'
+            ? 'font-serif text-kpi-hero font-semibold leading-none tracking-[-0.02em] tabular-nums'
+            : 'font-serif text-kpi font-semibold leading-none tracking-[-0.02em] tabular-nums'
         }
       >
         {value}
         {unit && (
-          <span className={hero ? 'ml-0.5 font-sans text-[18px]' : 'ml-0.5 text-sm font-medium text-ink-3'}>
+          <span className={hero ? 'ml-1 font-sans text-[20px] font-medium text-ink-3' : 'ml-0.5 font-sans text-[15px] font-medium text-ink-3'}>
             {unit}
           </span>
         )}
