@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '../ui/AppShell'
 import { Card } from '../ui/Card'
@@ -10,8 +10,8 @@ import { RiskScore } from '../ui/RiskScore'
 import { Sparkline } from '../ui/Sparkline'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { SegmentToggle, type SegOption } from '../ui/SegmentToggle'
-import { riskColor } from '../lib/risk'
-import { getSuppliers, getSegmentExposure, type Supplier, type Segment, type SegmentExposure } from '../lib/data'
+import { riskBand, riskColor, type RiskBand } from '../lib/risk'
+import { getSuppliers, type Supplier, type Segment } from '../lib/data'
 
 // View modes for the SegmentToggle (kilde: V6ViewToggle).
 type ViewMode = 'matrix' | 'table' | 'cards'
@@ -72,12 +72,13 @@ function MatrixRow({ s }: { s: Supplier }) {
   )
 }
 
-function MatrixColumn({ exposure, suppliers }: { exposure: SegmentExposure; suppliers: Supplier[] }) {
-  const { segment, count } = exposure
+// Column stats are derived from the rows it receives, so headers always agree
+// with the (possibly filtered) body — no separate exposure source to drift from.
+function MatrixColumn({ segment, rows }: { segment: Segment; rows: Supplier[] }) {
   const hue = SEGMENT_HUE[segment]
-  const rows = suppliers
-    .filter((s) => s.segment === segment)
-    .sort((a, b) => b.riskScore - a.riskScore)
+  const count = rows.length
+  const spendEur = rows.reduce((sum, r) => sum + r.spendEur, 0)
+  const avgRisk = count ? Math.round(rows.reduce((sum, r) => sum + r.riskScore, 0) / count) : 0
   return (
     <Card flat className="flex flex-col overflow-hidden">
       {/* Column header — count + total spend + avg risk (kilde: V6 column header). */}
@@ -88,14 +89,14 @@ function MatrixColumn({ exposure, suppliers }: { exposure: SegmentExposure; supp
         </div>
         <div className="mb-2.5 font-mono text-[10.5px] tracking-[0.04em] text-ink-3">{SEGMENT_SUB[segment]}</div>
         <div className="flex items-baseline justify-between gap-2">
-          <span className="font-mono text-[12px] font-medium tabular-nums text-ink">{fmtSpendM(exposure.spendEur)}</span>
-          <span className="font-mono text-[10.5px] tabular-nums" style={{ color: riskColor(exposure.avgRisk) }}>
-            avg {exposure.avgRisk}
+          <span className="font-mono text-[12px] font-medium tabular-nums text-ink">{fmtSpendM(spendEur)}</span>
+          <span className="font-mono text-[10.5px] tabular-nums" style={{ color: riskColor(avgRisk) }}>
+            avg {avgRisk}
           </span>
         </div>
       </div>
       {/* Column body — scrollable list, highest risk first. */}
-      <div className="flex max-h-[calc(100vh-260px)] flex-col gap-1.5 overflow-auto p-2.5">
+      <div className="flex max-h-[calc(100vh-320px)] flex-col gap-1.5 overflow-auto p-2.5">
         {rows.length > 0 ? (
           rows.map((s) => <MatrixRow key={s.id} s={s} />)
         ) : (
@@ -106,8 +107,7 @@ function MatrixColumn({ exposure, suppliers }: { exposure: SegmentExposure; supp
   )
 }
 
-function MatrixView({ suppliers, exposure }: { suppliers: Supplier[]; exposure: SegmentExposure[] }) {
-  const byId = useMemo(() => new Map(exposure.map((e) => [e.segment, e])), [exposure])
+function MatrixView({ suppliers }: { suppliers: Supplier[] }) {
   return (
     <div>
       {/* Hero strip (kilde: V6MatrixHero). */}
@@ -124,11 +124,13 @@ function MatrixView({ suppliers, exposure }: { suppliers: Supplier[]; exposure: 
         </p>
       </div>
       <div className="grid grid-cols-4 items-start gap-3.5">
-        {SEGMENTS.map((seg) => {
-          const e = byId.get(seg)
-          if (!e) return null
-          return <MatrixColumn key={seg} exposure={e} suppliers={suppliers} />
-        })}
+        {SEGMENTS.map((seg) => (
+          <MatrixColumn
+            key={seg}
+            segment={seg}
+            rows={suppliers.filter((s) => s.segment === seg).sort((a, b) => b.riskScore - a.riskScore)}
+          />
+        ))}
       </div>
     </div>
   )
@@ -247,10 +249,55 @@ function CardsView({ suppliers }: { suppliers: Supplier[] }) {
   )
 }
 
+// ── Filter bar ───────────────────────────────────────────────────────────────
+const BANDS: RiskBand[] = ['Low', 'Watch', 'Elevated', 'Critical']
+
+function toggle<T>(arr: T[], v: T): T[] {
+  return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]
+}
+
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`cursor-pointer rounded-full border px-2.5 py-1 font-mono text-[11px] tracking-[0.02em] ${
+        active ? 'border-ink bg-ink text-white' : 'border-line bg-card text-ink-2 hover:bg-hover hover:text-ink'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export default function Suppliers() {
-  const suppliers = getSuppliers()
-  const exposure = getSegmentExposure()
+  const all = getSuppliers()
   const [view, setView] = useState<ViewMode>('matrix')
+  const [q, setQ] = useState('')
+  const [segs, setSegs] = useState<Segment[]>([])
+  const [bands, setBands] = useState<RiskBand[]>([])
+  const [country, setCountry] = useState('')
+
+  const countries = useMemo(() => [...new Set(all.map((s) => s.country))].sort(), [all])
+
+  // Presentation filtering over the full set — the data accessor stays "fetch all".
+  const filtered = useMemo(() => {
+    const query = q.trim().toLowerCase()
+    return all.filter((s) => {
+      if (segs.length && !segs.includes(s.segment)) return false
+      if (bands.length && !bands.includes(riskBand(s.riskScore))) return false
+      if (country && s.country !== country) return false
+      if (query && !`${s.name} ${s.id} ${s.category}`.toLowerCase().includes(query)) return false
+      return true
+    })
+  }, [all, q, segs, bands, country])
+
+  const anyFilter = q.trim() !== '' || segs.length > 0 || bands.length > 0 || country !== ''
+  function clear() {
+    setQ('')
+    setSegs([])
+    setBands([])
+    setCountry('')
+  }
 
   return (
     <AppShell
@@ -264,15 +311,74 @@ export default function Suppliers() {
       }
     >
       <div className="px-6 py-4">
-        {/* View toggle row */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="font-mono text-[11px] tabular-nums text-ink-3">{suppliers.length} active</div>
+        {/* Count + view toggle */}
+        <div className="mb-3 flex items-center justify-between">
+          <div className="font-mono text-[11px] tabular-nums text-ink-3">
+            {filtered.length}{anyFilter ? ` of ${all.length}` : ''} active
+          </div>
           <SegmentToggle options={VIEW_OPTIONS} value={view} onChange={setView} />
         </div>
 
-        {view === 'matrix' && <MatrixView suppliers={suppliers} exposure={exposure} />}
-        {view === 'table' && <TableView suppliers={suppliers} />}
-        {view === 'cards' && <CardsView suppliers={suppliers} />}
+        {/* Filter bar */}
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-line bg-paper-2 px-3 py-2.5">
+          <div className="relative">
+            <Icon name="search" size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-3" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Filter by name, id, category…"
+              className="w-[240px] rounded-md border border-line bg-card py-[5px] pr-2.5 pl-7 font-sans text-[12.5px] text-ink outline-none placeholder:text-ink-4 focus:border-line-3"
+            />
+          </div>
+
+          <span className="mx-1 h-5 w-px bg-line" />
+          {SEGMENTS.map((seg) => (
+            <Chip key={seg} active={segs.includes(seg)} onClick={() => setSegs((a) => toggle(a, seg))}>{seg}</Chip>
+          ))}
+
+          <span className="mx-1 h-5 w-px bg-line" />
+          {BANDS.map((b) => (
+            <Chip key={b} active={bands.includes(b)} onClick={() => setBands((a) => toggle(a, b))}>{b}</Chip>
+          ))}
+
+          <span className="mx-1 h-5 w-px bg-line" />
+          <select
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="cursor-pointer rounded-md border border-line bg-card px-2 py-[5px] font-mono text-[11.5px] text-ink-2 outline-none focus:border-line-3"
+          >
+            <option value="">All countries</option>
+            {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+
+          {anyFilter && (
+            <button onClick={clear} className="ml-auto cursor-pointer rounded-md px-2 py-1 font-mono text-[11px] text-ink-3 hover:text-ink">
+              Clear ✕
+            </button>
+          )}
+        </div>
+
+        {/* Views or empty state */}
+        {filtered.length === 0 ? (
+          <Card flat className="grid place-items-center px-6 py-20 text-center">
+            <div>
+              <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-lg border border-line bg-card text-ink-3">
+                <Icon name="filter" size={18} />
+              </div>
+              <div className="font-serif text-[20px] tracking-[-0.015em]">No suppliers match</div>
+              <div className="mt-1 text-[12.5px] text-ink-3">Try loosening the filters.</div>
+              <button onClick={clear} className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-line bg-card px-2.5 py-1.5 text-[12.5px] font-medium text-ink hover:bg-hover">
+                Clear filters
+              </button>
+            </div>
+          </Card>
+        ) : (
+          <>
+            {view === 'matrix' && <MatrixView suppliers={filtered} />}
+            {view === 'table' && <TableView suppliers={filtered} />}
+            {view === 'cards' && <CardsView suppliers={filtered} />}
+          </>
+        )}
       </div>
     </AppShell>
   )
