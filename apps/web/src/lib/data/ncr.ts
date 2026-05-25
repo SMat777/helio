@@ -53,6 +53,7 @@ function canonicalRow(): NcrRow {
 function generate(supplierId: string): NcrRow[] {
   const s = SUPPLIERS.find((x) => x.id === supplierId)
   if (!s) return []
+  const idx = SUPPLIERS.indexOf(s)
   const rng = seededRng(`ncrs:${s.id}`)
   const rows: NcrRow[] = []
 
@@ -69,7 +70,8 @@ function generate(supplierId: string): NcrRow[] {
     const due = addDays(opened, intBetween(rng, 30, 45))
     const status: NcrStatus = isOpen ? (severity === 'critical' ? '8d' : 'open') : 'closed'
     rows.push({
-      id: `NCR-2024-${String(intBetween(rng, 100, 999)).padStart(4, '0')}`,
+      // Deterministic + globally unique: supplier index (×9) + row index, never colliding.
+      id: `NCR-2024-${String(1001 + idx * 9 + i).padStart(4, '0')}`,
       supplierId: s.id,
       title: pickFrom(rng, TITLES),
       severity,
