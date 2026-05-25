@@ -40,17 +40,62 @@ export type NcrSection = {
   placeholder?: string
 }
 
+export type NcrSeverity = 'critical' | 'major' | 'minor'
+export type NcrStatus = 'draft' | 'open' | '8d' | 'closed'
+
 export type Ncr = {
   id: string            // "NCR-2024-0312"
   supplierId: string
   supplierName: string
   country: string
   segment: Segment
-  severity: 'critical' | 'major' | 'minor'
-  status: 'draft' | 'open' | '8d' | 'closed'
+  severity: NcrSeverity
+  status: NcrStatus
   openedAt: string
   dueAt: string
   dPhase: string        // "D4"
   costImpactEur: number
   sections: NcrSection[]
+}
+
+// Lightweight NCR row for lists (supplier detail tab + portfolio NCR list).
+export type NcrRow = {
+  id: string
+  supplierId: string
+  title: string
+  severity: NcrSeverity
+  status: NcrStatus
+  openedAt: string
+  dueAt: string
+  costImpactEur: number
+}
+
+export type Contract = {
+  id: string            // "CT-184-1"
+  supplierId: string
+  title: string
+  type: 'Supply' | 'Framework' | 'Quality' | 'Logistics' | 'NDA'
+  valueEur: number
+  start: string         // ISO yyyy-mm-dd
+  end: string
+  status: 'active' | 'expiring' | 'expired' | 'draft'
+}
+
+export type Contact = {
+  supplierId: string
+  name: string
+  role: string
+  email: string
+  phone: string
+  primary?: boolean
+}
+
+// Named SupplierDocument to avoid clashing with the DOM `Document` type.
+export type SupplierDocument = {
+  supplierId: string
+  name: string
+  fileType: 'PDF' | 'XLSX' | 'DOCX' | 'CSV'
+  category: string
+  date: string
+  sizeKb: number
 }

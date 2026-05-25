@@ -10,6 +10,14 @@ import { ACTIVITY } from './activity'
 import { NCR } from './ncr'
 
 export type { Supplier, ActivityEvent, Ncr, Segment } from '../types'
+export type { Contract, Contact, SupplierDocument, NcrRow, NcrSeverity, NcrStatus } from '../types'
+
+// Detail-tab + portfolio accessors — same swap boundary as the rest of this module.
+export { getContracts } from './contracts'
+export { getContacts } from './contacts'
+export { getDocuments } from './documents'
+export { getActivityForSupplier } from './activity'
+export { getNcrsForSupplier, getNcrs } from './ncr'
 
 export type Kpi = {
   label: string

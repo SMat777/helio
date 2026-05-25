@@ -12,19 +12,51 @@ import { RiskScore } from '../ui/RiskScore'
 import { Sparkline } from '../ui/Sparkline'
 import { AreaChart } from '../ui/AreaChart'
 import { SectionHead } from '../ui/SectionHead'
+import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
+import { ActivityFeed } from '../ui/ActivityFeed'
 import { riskBand, riskColor } from '../lib/risk'
-import { getSupplier, type Supplier } from '../lib/data'
+import {
+  getSupplier,
+  getContracts,
+  getContacts,
+  getDocuments,
+  getNcrsForSupplier,
+  getActivityForSupplier,
+  type Supplier,
+  type Contract,
+  type NcrRow,
+} from '../lib/data'
 
-// Detail tabs — 7 fixed, in HANDOFF §3 order (kilde: V5Tabs).
-const TABS: Tab[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'scorecard', label: 'Scorecard' },
-  { id: 'contracts', label: 'Contracts' },
-  { id: 'ncrs', label: 'NCRs' },
-  { id: 'contacts', label: 'Contacts' },
-  { id: 'documents', label: 'Documents' },
-  { id: 'activity', label: 'Activity' },
-]
+// Compact euro formatting — "€1.2M" / "€340k" / "€8,000".
+function fmtMoney(eur: number): string {
+  if (eur >= 1_000_000) return `€${(eur / 1_000_000).toFixed(1)}M`
+  if (eur >= 1_000) return `€${Math.round(eur / 1_000)}k`
+  return `€${eur.toLocaleString('en-US')}`
+}
+
+function fmtSize(kb: number): string {
+  return kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`
+}
+
+const contractTone: Record<Contract['status'], 'good' | 'warn' | 'bad' | 'muted'> = {
+  active: 'good',
+  expiring: 'warn',
+  expired: 'bad',
+  draft: 'muted',
+}
+
+const ncrSeverityTone: Record<NcrRow['severity'], 'bad' | 'warn' | 'muted'> = {
+  critical: 'bad',
+  major: 'warn',
+  minor: 'muted',
+}
+
+const ncrStatusTone: Record<NcrRow['status'], 'bad' | 'warn' | 'muted' | 'good'> = {
+  '8d': 'bad',
+  open: 'warn',
+  draft: 'muted',
+  closed: 'good',
+}
 
 type Tone = 'good' | 'warn' | 'bad'
 
@@ -71,17 +103,144 @@ function SignalCard({ label, value, note, tone, data }: {
   )
 }
 
-// Lightweight "not designed yet" panel for the five unbuilt tabs.
-function PlaceholderPanel({ label }: { label: string }) {
+// Shown when a tab genuinely has no rows for this supplier (not "unbuilt").
+function EmptyTab({ label }: { label: string }) {
   return (
-    <Card flat className="grid min-h-[200px] place-items-center px-6 py-12">
+    <Card flat className="grid min-h-[180px] place-items-center px-6 py-12">
       <div className="text-center">
         <div className="mb-2 inline-grid h-9 w-9 place-items-center rounded-lg border border-line bg-paper text-ink-3">
-          <Icon name="doc" size={16} />
+          <Icon name="check" size={16} />
         </div>
         <div className="text-[13.5px] font-medium text-ink">{label}</div>
-        <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-ink-3">Designet ikke færdigt</div>
       </div>
+    </Card>
+  )
+}
+
+function ContractsTab({ id }: { id: string }) {
+  const rows = getContracts(id)
+  if (!rows.length) return <EmptyTab label="No contracts on file" />
+  return (
+    <Card flat className="overflow-hidden">
+      <Table>
+        <THead>
+          <Tr>
+            <Th>Contract</Th><Th>Type</Th><Th numeric>Value</Th><Th>Period</Th><Th>Status</Th>
+          </Tr>
+        </THead>
+        <TBody>
+          {rows.map((c) => (
+            <Tr key={c.id}>
+              <Td variant="name">
+                {c.title}
+                <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{c.id}</span>
+              </Td>
+              <Td className="text-ink-2">{c.type}</Td>
+              <Td variant="num">{fmtMoney(c.valueEur)}</Td>
+              <Td variant="micro">{c.start} → {c.end}</Td>
+              <Td><Pill tone={contractTone[c.status]} dot>{c.status}</Pill></Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
+    </Card>
+  )
+}
+
+function NcrsTab({ id }: { id: string }) {
+  const rows = getNcrsForSupplier(id)
+  if (!rows.length) return <EmptyTab label="No NCRs — clean record" />
+  return (
+    <Card flat className="overflow-hidden">
+      <Table>
+        <THead>
+          <Tr>
+            <Th>NCR</Th><Th>Severity</Th><Th>Status</Th><Th>Opened</Th><Th>Due</Th><Th numeric>Cost</Th>
+          </Tr>
+        </THead>
+        <TBody>
+          {rows.map((n) => (
+            <Tr key={n.id}>
+              <Td variant="name">
+                {n.title}
+                <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{n.id}</span>
+              </Td>
+              <Td><Pill tone={ncrSeverityTone[n.severity]} dot>{n.severity}</Pill></Td>
+              <Td><Pill tone={ncrStatusTone[n.status]}>{n.status}</Pill></Td>
+              <Td variant="micro">{n.openedAt}</Td>
+              <Td variant="micro">{n.dueAt}</Td>
+              <Td variant="num">{fmtMoney(n.costImpactEur)}</Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
+    </Card>
+  )
+}
+
+function ContactsTab({ id }: { id: string }) {
+  const rows = getContacts(id)
+  if (!rows.length) return <EmptyTab label="No contacts on file" />
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {rows.map((c) => (
+        <Card key={c.email} flat className="px-4 py-3.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[13.5px] font-medium text-ink">{c.name}</div>
+            {c.primary && <Pill tone="outline">Primary</Pill>}
+          </div>
+          <div className="mt-0.5 font-mono text-[11px] text-ink-3">{c.role}</div>
+          <div className="mt-2.5 flex items-center gap-2 text-[12.5px] text-ink-2">
+            <Icon name="doc" size={13} className="text-ink-4" />{c.email}
+          </div>
+          <div className="mt-1 flex items-center gap-2 font-mono text-[12px] text-ink-3">
+            <Icon name="users" size={13} className="text-ink-4" />{c.phone}
+          </div>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function DocumentsTab({ id }: { id: string }) {
+  const rows = getDocuments(id)
+  if (!rows.length) return <EmptyTab label="No documents on file" />
+  return (
+    <Card flat className="overflow-hidden">
+      {rows.map((d, i) => (
+        <div
+          key={`${d.name}-${i}`}
+          className="flex items-center gap-3 border-b border-line-2 px-4 py-2.5 last:border-b-0"
+        >
+          <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-line bg-paper-2 text-ink-3">
+            <Icon name="doc" size={15} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-medium text-ink">{d.name}</div>
+            <div className="font-mono text-[11px] text-ink-3">{d.category} · {d.date}</div>
+          </div>
+          <Pill tone="muted">{d.fileType}</Pill>
+          <span className="w-[64px] text-right font-mono text-[11px] tabular-nums text-ink-3">{fmtSize(d.sizeKb)}</span>
+        </div>
+      ))}
+    </Card>
+  )
+}
+
+function ActivityTab({ id }: { id: string }) {
+  const events = getActivityForSupplier(id)
+  if (!events.length) return <EmptyTab label="No recent activity" />
+  return (
+    <Card flat className="px-5 py-2.5">
+      <ActivityFeed
+        items={events.map((e) => ({
+          tone: e.tone,
+          who: e.who,
+          what: e.what,
+          detail: e.detail,
+          time: `${e.day} · ${e.time}`,
+        }))}
+      />
     </Card>
   )
 }
@@ -253,6 +412,17 @@ export default function SupplierDetail() {
   const qTone = qualityTone(s.qualityPct)
   const otTone = onTimeTone(s.onTimePct)
 
+  // Tabs carry live counts so the bar reflects what each panel holds.
+  const tabs: Tab[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'scorecard', label: 'Scorecard' },
+    { id: 'contracts', label: 'Contracts', count: getContracts(s.id).length },
+    { id: 'ncrs', label: 'NCRs', count: getNcrsForSupplier(s.id).length },
+    { id: 'contacts', label: 'Contacts', count: getContacts(s.id).length },
+    { id: 'documents', label: 'Documents', count: getDocuments(s.id).length },
+    { id: 'activity', label: 'Activity' },
+  ]
+
   return (
     <AppShell
       slim
@@ -306,16 +476,16 @@ export default function SupplierDetail() {
         </Card>
 
         {/* Tabs */}
-        <Tabs tabs={TABS} active={active} onChange={setActive} className="mb-3" />
+        <Tabs tabs={tabs} active={active} onChange={setActive} className="mb-3" />
 
         {/* Tab panels */}
         {active === 'overview' && <OverviewTab s={s} />}
         {active === 'scorecard' && <ScorecardTab s={s} />}
-        {active === 'contracts' && <PlaceholderPanel label="Contracts" />}
-        {active === 'ncrs' && <PlaceholderPanel label="NCRs" />}
-        {active === 'contacts' && <PlaceholderPanel label="Contacts" />}
-        {active === 'documents' && <PlaceholderPanel label="Documents" />}
-        {active === 'activity' && <PlaceholderPanel label="Activity" />}
+        {active === 'contracts' && <ContractsTab id={s.id} />}
+        {active === 'ncrs' && <NcrsTab id={s.id} />}
+        {active === 'contacts' && <ContactsTab id={s.id} />}
+        {active === 'documents' && <DocumentsTab id={s.id} />}
+        {active === 'activity' && <ActivityTab id={s.id} />}
       </div>
     </AppShell>
   )
