@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AppShell } from '../ui/AppShell'
 import { Card } from '../ui/Card'
 import { Pill, type PillTone } from '../ui/Pill'
@@ -11,7 +11,8 @@ import { Sparkline } from '../ui/Sparkline'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { SegmentToggle, type SegOption } from '../ui/SegmentToggle'
 import { riskBand, riskColor, type RiskBand } from '../lib/risk'
-import { getSuppliers, type Supplier, type Segment } from '../lib/data'
+import { type Supplier, type Segment } from '../lib/data'
+import { useSuppliers } from '../lib/store/suppliers'
 import { toCsv, downloadCsv } from '../lib/csv'
 import { fmtMoneyM } from '../lib/format'
 
@@ -266,7 +267,8 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 export default function Suppliers() {
-  const all = getSuppliers()
+  const navigate = useNavigate()
+  const all = useSuppliers()
   const [view, setView] = useState<ViewMode>('matrix')
   const [q, setQ] = useState('')
   const [segs, setSegs] = useState<Segment[]>([])
@@ -309,7 +311,7 @@ export default function Suppliers() {
       actions={
         <>
           <Button onClick={exportCsv}><Icon name="export" /> Export CSV</Button>
-          <Button variant="primary"><Icon name="plus" /> Add supplier</Button>
+          <Button variant="primary" onClick={() => navigate('/suppliers/new')}><Icon name="plus" /> Add supplier</Button>
         </>
       }
     >

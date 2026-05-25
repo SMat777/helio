@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import Dashboard from './screens/Dashboard'
 import Suppliers from './screens/Suppliers'
+import NewSupplier from './screens/NewSupplier'
 import SupplierDetail from './screens/SupplierDetail'
 import NewNcr from './screens/NewNcr'
 import Ncrs from './screens/Ncrs'
@@ -36,6 +37,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/suppliers/new" element={<NewSupplier />} />
         <Route path="/suppliers/:id" element={<SupplierDetail />} />
         <Route path="/ncr/new" element={<NewNcr />} />
         <Route path="/ncrs" element={<Ncrs />} />

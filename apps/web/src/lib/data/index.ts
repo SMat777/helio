@@ -5,7 +5,8 @@
 
 import { riskBand } from '../risk'
 import type { Supplier, ActivityEvent, Ncr, Segment, SpendByKey, SpendBreakdown, Insight } from '../types'
-import { SUPPLIERS, NEEDS_ATTENTION_IDS } from './suppliers'
+import { NEEDS_ATTENTION_IDS } from './suppliers'
+import { supplierList } from '../store/suppliers'
 import { ACTIVITY } from './activity'
 import { NCR } from './ncr'
 
@@ -48,17 +49,19 @@ export type SegmentExposure = {
 export type CategoryRisk = { category: string; count: number; avgRisk: number; pct: number }
 
 // ── Suppliers ──────────────────────────────────────────────────────────────
+// Reads the in-memory store so newly added suppliers ripple through every
+// derived view (KPIs, bands, spend). The store IS the mock backing.
 export function getSuppliers(): Supplier[] {
-  return SUPPLIERS
+  return supplierList()
 }
 
 export function getSupplier(id: string): Supplier | undefined {
-  return SUPPLIERS.find((s) => s.id === id)
+  return getSuppliers().find((s) => s.id === id)
 }
 
 // Needs-attention: the named, overlaid suppliers, highest risk first.
 export function getNeedsAttention(limit = 5): Supplier[] {
-  return SUPPLIERS.filter((s) => NEEDS_ATTENTION_IDS.includes(s.id))
+  return getSuppliers().filter((s) => NEEDS_ATTENTION_IDS.includes(s.id))
     .sort((a, b) => b.riskScore - a.riskScore)
     .slice(0, limit)
 }
@@ -72,15 +75,16 @@ const BAND_META: { label: BandRow['label']; range: string; color: string; test: 
 ]
 
 export function getRiskSummary(): RiskSummary {
+  const all = getSuppliers()
   const bands: BandRow[] = BAND_META.map((b) => ({
     label: b.label,
     range: b.range,
     color: b.color,
-    n: SUPPLIERS.filter((s) => b.test(s.riskScore)).length,
+    n: all.filter((s) => b.test(s.riskScore)).length,
   }))
   const atRisk = bands.filter((b) => b.label === 'Elevated' || b.label === 'Critical').reduce((s, b) => s + b.n, 0)
   return {
-    total: SUPPLIERS.length,
+    total: all.length,
     atRisk,
     bands,
     spendYtdEur: 48_200_000, // budget-tracked YTD spend (design figure, not the sum of supplier columns)
@@ -100,8 +104,9 @@ export function getKpis(): Kpi[] {
 
 export function getSegmentExposure(): SegmentExposure[] {
   const segments: Segment[] = ['Strategic', 'Bottleneck', 'Leverage', 'Routine']
+  const all = getSuppliers()
   return segments.map((segment) => {
-    const rows = SUPPLIERS.filter((s) => s.segment === segment)
+    const rows = all.filter((s) => s.segment === segment)
     const spendEur = rows.reduce((s, r) => s + r.spendEur, 0)
     const avgRisk = rows.length ? Math.round(rows.reduce((s, r) => s + r.riskScore, 0) / rows.length) : 0
     return { segment, count: rows.length, spendEur, avgRisk }
@@ -111,7 +116,7 @@ export function getSegmentExposure(): SegmentExposure[] {
 // Per-category exposure for the dashboard risk radar (top categories by avg risk).
 export function getCategoryRisk(limit = 6): CategoryRisk[] {
   const map = new Map<string, number[]>()
-  for (const s of SUPPLIERS) {
+  for (const s of getSuppliers()) {
     if (!map.has(s.category)) map.set(s.category, [])
     map.get(s.category)!.push(s.riskScore)
   }
@@ -142,15 +147,16 @@ export function getNcrSummary(): { open: number; critical: number; dueThisWeek: 
 
 // ── Spend ────────────────────────────────────────────────────────────────--
 export function getSpendBreakdown(): SpendBreakdown {
-  const total = SUPPLIERS.reduce((sum, s) => sum + s.spendEur, 0)
+  const all = getSuppliers()
+  const total = all.reduce((sum, s) => sum + s.spendEur, 0)
   const groupBy = (key: (s: Supplier) => string): SpendByKey[] => {
     const m = new Map<string, number>()
-    for (const s of SUPPLIERS) m.set(key(s), (m.get(key(s)) ?? 0) + s.spendEur)
+    for (const s of all) m.set(key(s), (m.get(key(s)) ?? 0) + s.spendEur)
     return [...m.entries()]
       .map(([k, eur]) => ({ key: k, eur, pct: Math.round((eur / total) * 100) }))
       .sort((a, b) => b.eur - a.eur)
   }
-  const topSuppliers = [...SUPPLIERS]
+  const topSuppliers = [...all]
     .sort((a, b) => b.spendEur - a.spendEur)
     .slice(0, 8)
     .map((s) => ({ id: s.id, name: s.name, eur: s.spendEur, spend: s.spend }))
