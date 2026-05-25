@@ -7,6 +7,7 @@ import SupplierDetail from './screens/SupplierDetail'
 import NewNcr from './screens/NewNcr'
 import Ncrs from './screens/Ncrs'
 import Categories from './screens/Categories'
+import CategoryDetail from './screens/CategoryDetail'
 import Scorecards from './screens/Scorecards'
 import Contracts from './screens/Contracts'
 import Spend from './screens/Spend'
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/ncr/new" element={<NewNcr />} />
         <Route path="/ncrs" element={<Ncrs />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/categories/:key" element={<CategoryDetail />} />
         <Route path="/contracts" element={<Contracts />} />
         <Route path="/insights" element={<Insights />} />
         <Route path="/scorecards" element={<Scorecards />} />

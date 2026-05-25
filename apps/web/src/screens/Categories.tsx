@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../ui/AppShell'
 import { Card } from '../ui/Card'
 import { KPI } from '../ui/KPI'
@@ -10,6 +11,7 @@ import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 import { fmtMoney } from '../lib/format'
 
 export default function Categories() {
+  const navigate = useNavigate()
   const { data: suppliers = [] } = useSuppliersQuery()
   const rows = useMemo(() => {
     const spend = new Map(getSpendBreakdown(suppliers).byCategory.map((c) => [c.key, c]))
@@ -44,14 +46,14 @@ export default function Categories() {
           <Table>
             <THead>
               <Tr>
-                <Th>Category</Th><Th numeric>Suppliers</Th><Th className="w-[220px]">Avg risk</Th><Th numeric>Spend</Th><Th numeric>Share</Th>
+                <Th>Category</Th><Th numeric>Suppliers</Th><Th className="w-[220px]">Avg risk</Th><Th numeric>Spend</Th><Th numeric>Share</Th><Th />
               </Tr>
             </THead>
             <TBody>
               {rows.map((r) => {
                 const color = riskColor(r.avgRisk)
                 return (
-                  <Tr key={r.category}>
+                  <Tr key={r.category} onClick={() => navigate(`/categories/${encodeURIComponent(r.category)}`)}>
                     <Td variant="name">{r.category}</Td>
                     <Td variant="num">{r.count}</Td>
                     <Td>
@@ -64,6 +66,7 @@ export default function Categories() {
                     </Td>
                     <Td variant="num">{fmtMoney(r.spendEur)}</Td>
                     <Td variant="num">{r.share}%</Td>
+                    <Td className="w-8 text-right text-ink-4">›</Td>
                   </Tr>
                 )
               })}
