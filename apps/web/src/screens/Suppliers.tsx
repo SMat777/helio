@@ -12,7 +12,7 @@ import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { SegmentToggle, type SegOption } from '../ui/SegmentToggle'
 import { riskBand, riskColor, type RiskBand } from '../lib/risk'
 import { type Supplier, type Segment } from '../lib/data'
-import { useSuppliers } from '../lib/store/suppliers'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 import { toCsv, downloadCsv } from '../lib/csv'
 import { fmtMoneyM } from '../lib/format'
 
@@ -268,7 +268,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 export default function Suppliers() {
   const navigate = useNavigate()
-  const all = useSuppliers()
+  const { data: all = [], isLoading, isError, error } = useSuppliersQuery()
   const [view, setView] = useState<ViewMode>('matrix')
   const [q, setQ] = useState('')
   const [segs, setSegs] = useState<Segment[]>([])
@@ -363,8 +363,22 @@ export default function Suppliers() {
           )}
         </div>
 
-        {/* Views or empty state */}
-        {filtered.length === 0 ? (
+        {/* Loading / error / views or empty state */}
+        {isLoading ? (
+          <Card flat className="grid place-items-center px-6 py-20 text-center">
+            <div className="font-mono text-[12.5px] text-ink-3">Loading suppliers…</div>
+          </Card>
+        ) : isError ? (
+          <Card flat className="grid place-items-center px-6 py-20 text-center">
+            <div>
+              <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-lg border border-bad bg-card text-bad">
+                <Icon name="warn" size={18} />
+              </div>
+              <div className="font-serif text-[20px] tracking-[-0.015em]">Could not load suppliers</div>
+              <div className="mt-1 font-mono text-[11.5px] text-ink-3">{error instanceof Error ? error.message : 'Unknown error'}</div>
+            </div>
+          </Card>
+        ) : filtered.length === 0 ? (
           <Card flat className="grid place-items-center px-6 py-20 text-center">
             <div>
               <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-lg border border-line bg-card text-ink-3">

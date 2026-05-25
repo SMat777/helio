@@ -7,7 +7,7 @@ import { SectionHead } from '../ui/SectionHead'
 import { RiskScore } from '../ui/RiskScore'
 import { riskBand, riskColor } from '../lib/risk'
 import { fmtMoneyM } from '../lib/format'
-import { useSuppliers, useSupplierStore, nextSupplierId } from '../lib/store/suppliers'
+import { useSuppliersQuery, useAddSupplier } from '../lib/data/suppliersRepo'
 import type { Segment, Tier, Supplier } from '../lib/types'
 
 const SEGMENTS: { value: Segment; sub: string }[] = [
@@ -44,15 +44,28 @@ type Flash = { kind: 'err'; msg: string } | null
 
 export function NewSupplier() {
   const navigate = useNavigate()
-  const all = useSuppliers()
-  const addSupplier = useSupplierStore((s) => s.addSupplier)
+  const { data: all = [] } = useSuppliersQuery()
+  const addMut = useAddSupplier()
 
   const categories = useMemo(() => [...new Set(all.map((s) => s.category))].sort(), [all])
   const countries = useMemo(() => [...new Set(all.map((s) => s.country))].sort(), [all])
 
+  // Next free SUP-NNN id, derived from the active source (Supabase or mock).
+  const nextId = useMemo(() => {
+    const max = all.reduce((m, s) => {
+      const n = parseInt(s.id.replace(/\D/g, ''), 10)
+      return Number.isFinite(n) ? Math.max(m, n) : m
+    }, 0)
+    return `SUP-${max + 1}`
+  }, [all])
+
   const [name, setName] = useState('')
-  const [category, setCategory] = useState(categories[0] ?? '')
-  const [country, setCountry] = useState(countries[0] ?? 'DE')
+  // Category/country default to the first option until the user picks one — the
+  // list arrives async, so we derive the effective value instead of seeding state.
+  const [categoryPick, setCategoryPick] = useState('')
+  const [countryPick, setCountryPick] = useState('')
+  const category = categoryPick || categories[0] || ''
+  const country = countryPick || countries[0] || 'DE'
   const [segment, setSegment] = useState<Segment>('Strategic')
   const [tier, setTier] = useState<Tier>(1)
   const [riskScore, setRiskScore] = useState(45)
@@ -70,7 +83,7 @@ export function NewSupplier() {
       setFlash({ kind: 'err', msg: 'Add a supplier name before creating' })
       return
     }
-    const id = nextSupplierId()
+    const id = nextId
     const supplier: Supplier = {
       id,
       name: name.trim(),
@@ -87,8 +100,7 @@ export function NewSupplier() {
       spendEur,
       trend: makeTrend(scorecard),
     }
-    addSupplier(supplier)
-    navigate(`/suppliers/${id}`)
+    addMut.mutate(supplier, { onSuccess: () => navigate(`/suppliers/${id}`) })
   }
 
   return (
@@ -112,7 +124,7 @@ export function NewSupplier() {
         {/* ── Document column ── */}
         <div className="mx-auto w-full max-w-[720px] px-16 pt-12 pb-16">
           <div className="mb-3.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">
-            New supplier · {nextSupplierId()}
+            New supplier · {nextId}
           </div>
 
           <input
@@ -124,12 +136,12 @@ export function NewSupplier() {
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             <Field label="Category">
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
+              <select value={category} onChange={(e) => setCategoryPick(e.target.value)} className={inputCls}>
                 {categories.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
             <Field label="Country">
-              <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputCls}>
+              <select value={country} onChange={(e) => setCountryPick(e.target.value)} className={inputCls}>
                 {countries.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>

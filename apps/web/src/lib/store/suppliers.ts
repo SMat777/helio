@@ -15,21 +15,7 @@ export const useSupplierStore = create<SupplierStore>((set) => ({
   addSupplier: (s) => set((state) => ({ suppliers: [s, ...state.suppliers] })),
 }))
 
-// Non-reactive read for plain accessors (called outside React render).
+// Non-reactive read for plain accessors and the repo's mock fallback.
 export function supplierList(): Supplier[] {
   return useSupplierStore.getState().suppliers
-}
-
-// Reactive selector for screens that must update live as suppliers are added.
-export function useSuppliers(): Supplier[] {
-  return useSupplierStore((s) => s.suppliers)
-}
-
-// Next free SUP-NNN id, one past the current numeric max.
-export function nextSupplierId(): string {
-  const max = supplierList().reduce((m, s) => {
-    const n = parseInt(s.id.replace(/\D/g, ''), 10)
-    return Number.isFinite(n) ? Math.max(m, n) : m
-  }, 0)
-  return `SUP-${max + 1}`
 }
