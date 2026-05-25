@@ -15,6 +15,7 @@ import { SectionHead } from '../ui/SectionHead'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { ActivityFeed } from '../ui/ActivityFeed'
 import { riskBand, riskColor } from '../lib/risk'
+import { toCsv, downloadCsv } from '../lib/csv'
 import {
   getSupplier,
   getContracts,
@@ -26,6 +27,13 @@ import {
   type Contract,
   type NcrRow,
 } from '../lib/data'
+
+// Export a single supplier's headline fields as a one-row CSV.
+function exportSupplier(s: Supplier) {
+  const headers = ['ID', 'Name', 'Country', 'Category', 'Segment', 'Tier', 'Scorecard', 'Risk', 'OnTime%', 'Quality', 'OpenNCRs', 'SpendEUR']
+  const row = [s.id, s.name, s.country, s.category, s.segment, s.tier, s.scorecard, s.riskScore, s.onTimePct, s.qualityPct, s.ncrs, s.spendEur]
+  downloadCsv(`helio-${s.id}.csv`, toCsv(headers, [row]))
+}
 
 // Compact euro formatting — "€1.2M" / "€340k" / "€8,000".
 function fmtMoney(eur: number): string {
@@ -429,8 +437,10 @@ export default function SupplierDetail() {
       crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; {s.id}</>}
       actions={
         <>
-          <Button><Icon name="export" /> Export</Button>
-          <Button variant="primary">Open NCR</Button>
+          <Button onClick={() => exportSupplier(s)}><Icon name="export" /> Export</Button>
+          <Link to="/ncr/new" className="no-underline">
+            <Button variant="primary">Open NCR</Button>
+          </Link>
         </>
       }
     >

@@ -3,6 +3,8 @@ import { NavLink } from 'react-router-dom'
 import { Icon, type IconName } from './Icon'
 import { Pill } from './Pill'
 import { CommandPalette } from './CommandPalette'
+import { ActivityFeed } from './ActivityFeed'
+import { getActivity } from '../lib/data'
 
 type NavItem = { label: string; to: string; icon: IconName; trail?: string; warn?: number; bad?: number; end?: boolean }
 type NavGroup = { section: string; items: NavItem[] }
@@ -78,6 +80,43 @@ function Sidebar() {
   )
 }
 
+// Bell with a popover of recent activity (kilde: DV2 activity feed).
+function NotificationsBell() {
+  const [open, setOpen] = useState(false)
+  const items = getActivity(6).map((e) => ({
+    tone: e.tone,
+    who: e.who,
+    what: e.what,
+    detail: e.detail,
+    time: `${e.day} · ${e.time}`,
+  }))
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="relative cursor-pointer rounded-md border border-transparent px-1.5 py-1.5 text-ink-2 hover:bg-hover hover:text-ink"
+      >
+        <Icon name="bell" />
+        <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-bad" />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[340px] overflow-hidden rounded-xl border border-line bg-card shadow-[0_16px_44px_-12px_rgba(40,30,20,0.28)]">
+            <div className="flex items-center justify-between border-b border-line px-4 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">
+              <span>Notifications</span>
+              <span>last 24h</span>
+            </div>
+            <div className="max-h-[360px] overflow-auto px-4 py-1">
+              <ActivityFeed items={items} />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function Topbar({ crumb, actions, slim = false, onOpenSearch }: { crumb?: ReactNode; actions?: ReactNode; slim?: boolean; onOpenSearch: () => void }) {
   return (
     <div className={`flex items-center justify-between border-b border-line bg-paper ${slim ? 'px-7 py-2.5' : 'px-8 py-3.5'}`}>
@@ -92,9 +131,7 @@ function Topbar({ crumb, actions, slim = false, onOpenSearch }: { crumb?: ReactN
           <span className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-[3px] border border-line bg-paper px-1.5 py-px font-mono text-[10px]">⌘K</span>
         </button>
         {actions}
-        <button className="cursor-pointer rounded-md border border-transparent px-1.5 py-1.5 text-ink-2 hover:bg-hover hover:text-ink">
-          <Icon name="bell" />
-        </button>
+        <NotificationsBell />
       </div>
     </div>
   )
