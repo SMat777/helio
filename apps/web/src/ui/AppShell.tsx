@@ -16,7 +16,7 @@ const NAV: NavGroup[] = [
       { label: 'Suppliers', to: '/suppliers', icon: 'building', trail: '247' },
       { label: 'Categories', to: '/categories', icon: 'folder' },
       { label: 'Contracts', to: '/contracts', icon: 'doc', warn: 9 },
-      { label: 'NCRs', to: '/ncr/new', icon: 'warn', bad: 3 },
+      { label: 'NCRs', to: '/ncrs', icon: 'warn', bad: 3 },
       { label: 'Insights', to: '/insights', icon: 'sparkle' },
     ],
   },

@@ -4,6 +4,7 @@ import Dashboard from './screens/Dashboard'
 import Suppliers from './screens/Suppliers'
 import SupplierDetail from './screens/SupplierDetail'
 import NewNcr from './screens/NewNcr'
+import Ncrs from './screens/Ncrs'
 import Placeholder from './screens/Placeholder'
 import Showcase from './screens/Showcase'
 
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/suppliers/:id" element={<SupplierDetail />} />
         <Route path="/ncr/new" element={<NewNcr />} />
+        <Route path="/ncrs" element={<Ncrs />} />
         <Route path="/categories" element={<Placeholder title="Categories" />} />
         <Route path="/contracts" element={<Placeholder title="Contracts" />} />
         <Route path="/insights" element={<Placeholder title="Insights" />} />
