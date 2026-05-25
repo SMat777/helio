@@ -12,6 +12,7 @@ import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { SegmentToggle, type SegOption } from '../ui/SegmentToggle'
 import { riskBand, riskColor, type RiskBand } from '../lib/risk'
 import { getSuppliers, type Supplier, type Segment } from '../lib/data'
+import { toCsv, downloadCsv } from '../lib/csv'
 
 // View modes for the SegmentToggle (kilde: V6ViewToggle).
 type ViewMode = 'matrix' | 'table' | 'cards'
@@ -299,13 +300,20 @@ export default function Suppliers() {
     setCountry('')
   }
 
+  // Export the currently filtered rows — a real download, not a decorative button.
+  function exportCsv() {
+    const headers = ['ID', 'Name', 'Country', 'Category', 'Segment', 'Tier', 'Scorecard', 'Risk', 'OnTime%', 'Quality', 'OpenNCRs', 'SpendEUR']
+    const rows = filtered.map((s) => [s.id, s.name, s.country, s.category, s.segment, s.tier, s.scorecard, s.riskScore, s.onTimePct, s.qualityPct, s.ncrs, s.spendEur])
+    downloadCsv(`helio-suppliers-${filtered.length}.csv`, toCsv(headers, rows))
+  }
+
   return (
     <AppShell
       slim
       crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; Suppliers</>}
       actions={
         <>
-          <Button><Icon name="export" /> Export CSV</Button>
+          <Button onClick={exportCsv}><Icon name="export" /> Export CSV</Button>
           <Button variant="primary"><Icon name="plus" /> Add supplier</Button>
         </>
       }
