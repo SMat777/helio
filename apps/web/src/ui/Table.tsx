@@ -3,7 +3,7 @@ import type { ReactNode, ThHTMLAttributes, TdHTMLAttributes } from 'react'
 // Styled table primitives (kilde: .t-table) — sticky head, hover rows, mono id/num cells.
 
 export function Table({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <table className={`w-full border-collapse text-[13px] ${className}`}>{children}</table>
+  return <table className={`w-full border-collapse text-[14px] ${className}`}>{children}</table>
 }
 
 export function THead({ children, sticky = true }: { children: ReactNode; sticky?: boolean }) {
@@ -30,7 +30,7 @@ type ThProps = { children?: ReactNode; numeric?: boolean } & ThHTMLAttributes<HT
 export function Th({ children, numeric = false, className = '', ...props }: ThProps) {
   return (
     <th
-      className={`border-b border-line bg-paper px-3 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-ink-3 ${
+      className={`border-b border-line bg-paper px-3 py-2.5 font-mono text-[11.5px] font-medium uppercase tracking-[0.04em] text-ink-3 ${
         numeric ? 'text-right' : 'text-left'
       } ${className}`}
       {...props}
@@ -44,9 +44,9 @@ type TdVariant = 'default' | 'num' | 'id' | 'name' | 'micro'
 const tdVariant: Record<TdVariant, string> = {
   default: 'text-ink',
   num: 'font-mono tabular-nums text-right text-ink',
-  id: 'font-mono text-[12px] text-ink-3',
+  id: 'font-mono text-[12.5px] text-ink-3',
   name: 'font-medium text-ink',
-  micro: 'font-mono text-[11px] text-ink-3',
+  micro: 'font-mono text-[12px] text-ink-3',
 }
 type TdProps = { children?: ReactNode; variant?: TdVariant } & TdHTMLAttributes<HTMLTableCellElement>
 export function Td({ children, variant = 'default', className = '', ...props }: TdProps) {

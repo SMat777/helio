@@ -15,13 +15,13 @@ export function Tabs({ tabs, active, onChange, className = '' }: {
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className={`-mb-px cursor-pointer border-b-2 px-3.5 py-2.5 text-[13px] font-medium ${
+            className={`-mb-px cursor-pointer border-b-2 px-3.5 py-3 text-[14px] font-medium ${
               isActive ? 'border-ink text-ink' : 'border-transparent text-ink-2 hover:text-ink'
             }`}
           >
             {t.label}
             {t.count != null && (
-              <span className="ml-1.5 rounded bg-rail px-[5px] py-px font-mono text-[11px] text-ink-3">{t.count}</span>
+              <span className="ml-1.5 rounded bg-rail px-[6px] py-px font-mono text-[11.5px] text-ink-3">{t.count}</span>
             )}
           </button>
         )

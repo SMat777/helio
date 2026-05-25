@@ -75,12 +75,12 @@ export default function Ncrs() {
                 return (
                   <Tr key={n.id}>
                     <Td variant="name" className="p-0">
-                      <Link to={`/suppliers/${n.supplierId}`} className="block px-3 py-[9px] text-ink no-underline">
-                        {n.title}
-                        <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{n.id}</span>
+                      <Link to={`/suppliers/${n.supplierId}`} className="block px-3 py-3 no-underline">
+                        <span className="text-[15.5px] font-semibold leading-tight text-ink">{n.title}</span>
+                        <span className="mt-1 block font-mono text-[12px] font-normal text-ink-3">{n.id}</span>
                       </Link>
                     </Td>
-                    <Td className="text-ink-2">{s?.name ?? n.supplierId}</Td>
+                    <Td className="text-[14px] text-ink-2">{s?.name ?? n.supplierId}</Td>
                     <Td><Pill tone={severityTone[n.severity]} dot>{n.severity}</Pill></Td>
                     <Td><Pill tone={statusTone[n.status]}>{n.status}</Pill></Td>
                     <Td variant="micro">{n.openedAt}</Td>

@@ -67,8 +67,8 @@ function SeverityList({ value, onSelect }: { value: Ncr['severity']; onSelect: (
 function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <>
-      <span className="font-mono text-[11px] text-ink-3">{label}</span>
-      <span className="text-right text-[12.5px] text-ink">{children}</span>
+      <span className="font-mono text-[12px] text-ink-3">{label}</span>
+      <span className="text-right text-[13.5px] text-ink">{children}</span>
     </>
   )
 }
@@ -179,7 +179,7 @@ export function NewNcr() {
                 onChange={(e) => setBody(s.n, e.target.value)}
                 placeholder={s.placeholder ?? 'Add detail…'}
                 rows={3}
-                className="m-0 w-full resize-none bg-transparent text-[15px] leading-[1.65] text-ink-2 outline-none placeholder:italic placeholder:text-ink-4 [field-sizing:content]"
+                className="m-0 w-full resize-none bg-transparent text-[16px] leading-[1.7] text-ink-2 outline-none placeholder:italic placeholder:text-ink-4 [field-sizing:content]"
               />
             </section>
           ))}

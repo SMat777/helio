@@ -79,8 +79,15 @@
      across the codebase — it now carries Outfit, not a serif. */
   --font-serif: "Outfit", system-ui, sans-serif;
 
-  --text-kpi:      36px;
+  --text-kpi:      38px;
   --text-kpi-hero: 64px;
+
+  /* Confident content scale — away from micro-fonts. Decision content reads
+     close to (but below) headings; labels/meta stay mono but never < 11px. */
+  --text-label: 11px;    /* mono eyebrows / table headers / pill labels */
+  --text-meta:  12.5px;  /* mono meta, ids, secondary annotations */
+  --text-body:  14px;    /* default body / table cell content */
+  --text-lead:  16px;    /* decision content: NCR bodies, lead lines, list titles */
 }
 
 /* The display face reads as confident only with weight behind it. Set a 600

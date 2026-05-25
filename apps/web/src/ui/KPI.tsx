@@ -20,7 +20,7 @@ export function KPI({ label, value, unit, delta, dir = 'flat', note, hero = fals
 }) {
   return (
     <div className="px-4 pt-3.5 pb-4">
-      <div className="mb-2 flex justify-between font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink-3">
+      <div className="mb-2 flex justify-between font-mono text-[11.5px] uppercase tracking-[0.06em] text-ink-3">
         <span>{label}</span>
         {note && <span>{note}</span>}
       </div>
