@@ -14,7 +14,7 @@ describe('supplier dataset', () => {
 
 describe('getRiskSummary', () => {
   it('matches the design band distribution (168 / 61 / 14 / 4)', () => {
-    const { total, atRisk, bands } = getRiskSummary()
+    const { total, atRisk, bands } = getRiskSummary(getSuppliers())
     expect(total).toBe(247)
     const byLabel = Object.fromEntries(bands.map((b) => [b.label, b.n]))
     expect(byLabel).toEqual({ Low: 168, Watch: 61, Elevated: 14, Critical: 4 })
@@ -24,7 +24,7 @@ describe('getRiskSummary', () => {
 
 describe('getNeedsAttention', () => {
   it('returns the named overlay suppliers, highest risk first', () => {
-    const top = getNeedsAttention()
+    const top = getNeedsAttention(getSuppliers())
     expect(top[0].id).toBe('SUP-184') // Heliox, risk 76
     expect(top.every((s) => s.reason)).toBe(true)
   })
@@ -32,7 +32,7 @@ describe('getNeedsAttention', () => {
 
 describe('getSegmentExposure', () => {
   it('covers all four Kraljic segments and sums to the full set', () => {
-    const exp = getSegmentExposure()
+    const exp = getSegmentExposure(getSuppliers())
     expect(exp.map((e) => e.segment).sort()).toEqual(['Bottleneck', 'Leverage', 'Routine', 'Strategic'])
     expect(exp.reduce((s, e) => s + e.count, 0)).toBe(247)
   })

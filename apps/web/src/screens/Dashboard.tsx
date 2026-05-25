@@ -8,6 +8,7 @@ import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { riskColor } from '../lib/risk'
 import { getKpis, getRiskSummary, getNeedsAttention, getActivity, type Supplier } from '../lib/data'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 
 // Dashboard-local: a "needs attention" story card (kilde: DV3StoryCard).
 function StoryCard({ s }: { s: Supplier }) {
@@ -32,9 +33,10 @@ function StoryCard({ s }: { s: Supplier }) {
 }
 
 export default function Dashboard() {
-  const kpis = getKpis()
-  const summary = getRiskSummary()
-  const needs = getNeedsAttention(5)
+  const { data: suppliers = [] } = useSuppliersQuery()
+  const kpis = getKpis(suppliers)
+  const summary = getRiskSummary(suppliers)
+  const needs = getNeedsAttention(suppliers, 5)
   const activity = getActivity(6)
 
   const critical = summary.bands.find((b) => b.label === 'Critical')?.n ?? 0

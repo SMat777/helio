@@ -8,6 +8,7 @@ import { PageHead } from '../ui/PageHead'
 import { HBarRow, HBarGroup } from '../ui/HBarRow'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { getSpendBreakdown, type SpendByKey } from '../lib/data'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 import { fmtMoney } from '../lib/format'
 
 // Normalise bar widths to the largest item so the group fills the track.
@@ -16,7 +17,8 @@ function bars(items: SpendByKey[], max: number) {
 }
 
 export default function Spend() {
-  const data = useMemo(() => getSpendBreakdown(), [])
+  const { data: suppliers = [] } = useSuppliersQuery()
+  const data = useMemo(() => getSpendBreakdown(suppliers), [suppliers])
   const segMax = Math.max(...data.bySegment.map((s) => s.eur), 1)
   const catMax = Math.max(...data.byCategory.map((s) => s.eur), 1)
   const variance = data.ytdEur - data.budgetEur

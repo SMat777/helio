@@ -406,11 +406,13 @@ export default function SupplierDetail() {
   const { id = '' } = useParams()
   // Source the supplier from the same query as the list, so a Postgres-backed
   // supplier (incl. one just added) resolves here too — not only mock-seeded ids.
-  const { data: all = [], isLoading } = useSuppliersQuery()
+  const { data: all = [], isPlaceholderData } = useSuppliersQuery()
   const supplier = all.find((x) => x.id === id)
   const [active, setActive] = useState('overview')
 
-  if (isLoading && !supplier) {
+  // While only the mock-seed placeholder is showing, a Postgres-only supplier
+  // (e.g. just added) isn't here yet — wait for the real fetch before NotFound.
+  if (isPlaceholderData && !supplier) {
     return (
       <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link></>}>
         <div className="grid place-items-center py-32 font-mono text-[12.5px] text-ink-3">Loading supplier…</div>

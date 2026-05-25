@@ -59,9 +59,13 @@ export function getSupplier(id: string): Supplier | undefined {
   return getSuppliers().find((s) => s.id === id)
 }
 
+// ── Derived views — pure over a supplier list ──────────────────────────────
+// These take the supplier array explicitly so screens can feed them the live
+// query data (Postgres or mock), keeping every view consistent with one source.
+
 // Needs-attention: the named, overlaid suppliers, highest risk first.
-export function getNeedsAttention(limit = 5): Supplier[] {
-  return getSuppliers().filter((s) => NEEDS_ATTENTION_IDS.includes(s.id))
+export function getNeedsAttention(suppliers: Supplier[], limit = 5): Supplier[] {
+  return suppliers.filter((s) => NEEDS_ATTENTION_IDS.includes(s.id))
     .sort((a, b) => b.riskScore - a.riskScore)
     .slice(0, limit)
 }
@@ -74,8 +78,7 @@ const BAND_META: { label: BandRow['label']; range: string; color: string; test: 
   { label: 'Critical', range: '75+', color: 'var(--bad)', test: (n) => riskBand(n) === 'Critical' },
 ]
 
-export function getRiskSummary(): RiskSummary {
-  const all = getSuppliers()
+export function getRiskSummary(all: Supplier[]): RiskSummary {
   const bands: BandRow[] = BAND_META.map((b) => ({
     label: b.label,
     range: b.range,
@@ -91,8 +94,8 @@ export function getRiskSummary(): RiskSummary {
   }
 }
 
-export function getKpis(): Kpi[] {
-  const sum = getRiskSummary()
+export function getKpis(suppliers: Supplier[]): Kpi[] {
+  const sum = getRiskSummary(suppliers)
   const ncr = getNcrSummary()
   return [
     { label: 'Active suppliers', value: String(sum.total), delta: '+12', dir: 'up', note: 'vs. last quarter' },
@@ -102,9 +105,8 @@ export function getKpis(): Kpi[] {
   ]
 }
 
-export function getSegmentExposure(): SegmentExposure[] {
+export function getSegmentExposure(all: Supplier[]): SegmentExposure[] {
   const segments: Segment[] = ['Strategic', 'Bottleneck', 'Leverage', 'Routine']
-  const all = getSuppliers()
   return segments.map((segment) => {
     const rows = all.filter((s) => s.segment === segment)
     const spendEur = rows.reduce((s, r) => s + r.spendEur, 0)
@@ -114,9 +116,9 @@ export function getSegmentExposure(): SegmentExposure[] {
 }
 
 // Per-category exposure for the dashboard risk radar (top categories by avg risk).
-export function getCategoryRisk(limit = 6): CategoryRisk[] {
+export function getCategoryRisk(suppliers: Supplier[], limit = 6): CategoryRisk[] {
   const map = new Map<string, number[]>()
-  for (const s of getSuppliers()) {
+  for (const s of suppliers) {
     if (!map.has(s.category)) map.set(s.category, [])
     map.get(s.category)!.push(s.riskScore)
   }
@@ -146,8 +148,7 @@ export function getNcrSummary(): { open: number; critical: number; dueThisWeek: 
 }
 
 // ── Spend ────────────────────────────────────────────────────────────────--
-export function getSpendBreakdown(): SpendBreakdown {
-  const all = getSuppliers()
+export function getSpendBreakdown(all: Supplier[]): SpendBreakdown {
   const total = all.reduce((sum, s) => sum + s.spendEur, 0)
   const groupBy = (key: (s: Supplier) => string): SpendByKey[] => {
     const m = new Map<string, number>()
@@ -172,10 +173,10 @@ export function getSpendBreakdown(): SpendBreakdown {
 
 // ── Insights ───────────────────────────────────────────────────────────────
 // Rule-based findings derived from the existing views — no new raw data.
-export function getInsights(): Insight[] {
-  const sum = getRiskSummary()
-  const cats = getCategoryRisk(20)
-  const seg = getSegmentExposure()
+export function getInsights(suppliers: Supplier[]): Insight[] {
+  const sum = getRiskSummary(suppliers)
+  const cats = getCategoryRisk(suppliers, 20)
+  const seg = getSegmentExposure(suppliers)
   const critical = sum.bands.find((b) => b.label === 'Critical')?.n ?? 0
   const eurM = (eur: number) => `€${(eur / 1e6).toFixed(1)}M`
 

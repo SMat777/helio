@@ -4,6 +4,7 @@ import { Card } from '../ui/Card'
 import { Pill } from '../ui/Pill'
 import { PageHead } from '../ui/PageHead'
 import { getInsights, type Insight } from '../lib/data'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 
 const toneVar: Record<Insight['tone'], string> = {
   good: 'var(--good)',
@@ -17,7 +18,8 @@ const tonePill: Record<Insight['tone'], 'good' | 'warn' | 'bad'> = {
 }
 
 export default function Insights() {
-  const insights = useMemo(() => getInsights(), [])
+  const { data: suppliers = [] } = useSuppliersQuery()
+  const insights = useMemo(() => getInsights(suppliers), [suppliers])
 
   return (
     <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; Insights</>}>

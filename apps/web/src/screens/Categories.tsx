@@ -5,23 +5,25 @@ import { KPI } from '../ui/KPI'
 import { PageHead } from '../ui/PageHead'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
 import { riskColor } from '../lib/risk'
-import { getCategoryRisk, getSpendBreakdown, getSuppliers } from '../lib/data'
+import { getCategoryRisk, getSpendBreakdown } from '../lib/data'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 import { fmtMoney } from '../lib/format'
 
 export default function Categories() {
+  const { data: suppliers = [] } = useSuppliersQuery()
   const rows = useMemo(() => {
-    const spend = new Map(getSpendBreakdown().byCategory.map((c) => [c.key, c]))
-    return getCategoryRisk(20)
+    const spend = new Map(getSpendBreakdown(suppliers).byCategory.map((c) => [c.key, c]))
+    return getCategoryRisk(suppliers, 20)
       .map((r) => ({
         ...r,
         spendEur: spend.get(r.category)?.eur ?? 0,
         share: spend.get(r.category)?.pct ?? 0,
       }))
       .sort((a, b) => b.avgRisk - a.avgRisk)
-  }, [])
+  }, [suppliers])
 
-  const totalSpend = useMemo(() => getSuppliers().reduce((s, x) => s + x.spendEur, 0), [])
-  const supplierCount = getSuppliers().length
+  const totalSpend = useMemo(() => suppliers.reduce((s, x) => s + x.spendEur, 0), [suppliers])
+  const supplierCount = suppliers.length
 
   return (
     <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; Categories</>}>

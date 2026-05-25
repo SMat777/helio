@@ -57,7 +57,14 @@ export async function insertSupplier(s: Supplier): Promise<void> {
 }
 
 export function useSuppliersQuery() {
-  return useQuery({ queryKey: QUERY_KEY, queryFn: fetchSuppliers })
+  // placeholderData = the mock seed, so `data` is never empty: screens render
+  // instantly with the seed and seamlessly swap to the real fetch — no loading
+  // flash. In Supabase mode the seed matches the seeded rows, so it's invisible.
+  return useQuery({
+    queryKey: QUERY_KEY,
+    queryFn: fetchSuppliers,
+    placeholderData: () => useSupplierStore.getState().suppliers,
+  })
 }
 
 export function useAddSupplier() {

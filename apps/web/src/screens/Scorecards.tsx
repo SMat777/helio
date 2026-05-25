@@ -7,7 +7,8 @@ import { Pill, type PillTone } from '../ui/Pill'
 import { SectionHead } from '../ui/SectionHead'
 import { PageHead } from '../ui/PageHead'
 import { Table, THead, TBody, Tr, Th, Td } from '../ui/Table'
-import { getSuppliers, type Supplier, type Segment } from '../lib/data'
+import { type Supplier, type Segment } from '../lib/data'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 
 const SEGMENT_PILL: Record<Segment, PillTone> = {
   Strategic: 'outline',
@@ -57,8 +58,9 @@ function ScoreTable({ rows }: { rows: Supplier[] }) {
 }
 
 export default function Scorecards() {
+  const { data: suppliers = [] } = useSuppliersQuery()
   const { top, bottom, avg, tier1, onTarget } = useMemo(() => {
-    const all = [...getSuppliers()].sort((a, b) => b.scorecard - a.scorecard)
+    const all = [...suppliers].sort((a, b) => b.scorecard - a.scorecard)
     const avg = Math.round(all.reduce((s, x) => s + x.scorecard, 0) / all.length)
     return {
       top: all.slice(0, 10),
@@ -67,7 +69,7 @@ export default function Scorecards() {
       tier1: all.filter((s) => s.tier === 1).length,
       onTarget: all.filter((s) => s.scorecard >= 85).length,
     }
-  }, [])
+  }, [suppliers])
 
   return (
     <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; Scorecards</>}>
