@@ -292,6 +292,74 @@ function HeaderStat({ label, value, unit, delta, tone, last }: {
   )
 }
 
+// Risk-band scale (0–100) split into the four bands with a marker at the score.
+const RISK_ZONES = [
+  { w: 40, color: 'var(--good)', label: 'Low' },
+  { w: 25, color: 'var(--ink-4)', label: 'Watch' },
+  { w: 10, color: 'var(--warn)', label: 'Elevated' },
+  { w: 25, color: 'var(--bad)', label: 'Critical' },
+]
+
+// One labelled driver bar: fill to value, dashed tick at target, tone-coloured.
+function DriverBar({ label, value, target, display, tone, higherBetter = true }: {
+  label: string; value: number; target: number; display: string; tone: Tone; higherBetter?: boolean
+}) {
+  const c = toneVar[tone]
+  return (
+    <div className="py-2">
+      <div className="mb-1.5 flex items-baseline justify-between">
+        <span className="text-[13px] text-ink-2">{label}</span>
+        <span className="font-mono text-[13.5px] font-semibold tabular-nums" style={{ color: c }}>{display}</span>
+      </div>
+      <div className="relative h-2 overflow-hidden rounded-full bg-line">
+        <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, value))}%`, background: c }} />
+        <div className="absolute top-[-2px] h-[calc(100%+4px)] w-px bg-ink-3" style={{ left: `${Math.min(100, Math.max(0, target))}%` }} title={`target ${target}`} />
+      </div>
+      <div className="mt-1 font-mono text-[10.5px] text-ink-4">{higherBetter ? '↑ higher is better' : '↓ lower is better'} · target {target}</div>
+    </div>
+  )
+}
+
+function RiskProfile({ s }: { s: Supplier }) {
+  const color = riskColor(s.riskScore)
+  return (
+    <Card flat className="px-5 pt-4 pb-5">
+      <div className="flex flex-wrap items-end justify-between gap-5">
+        <div>
+          <div className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-ink-3">Composite risk score</div>
+          <div className="flex items-baseline gap-3">
+            <span className="font-serif text-[52px] font-bold leading-none tabular-nums" style={{ color }}>{s.riskScore}</span>
+            <span className="text-[15px] font-semibold" style={{ color }}>{riskBand(s.riskScore)}</span>
+            {s.change && s.change !== '0' && <span className="font-mono text-[12.5px] text-ink-3">{s.change} vs 30d</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* band scale with marker */}
+      <div className="mt-4">
+        <div className="flex h-2.5 overflow-hidden rounded-full">
+          {RISK_ZONES.map((z) => <div key={z.label} style={{ width: `${z.w}%`, background: z.color, opacity: 0.85 }} />)}
+        </div>
+        <div className="relative h-0">
+          <div className="absolute -top-[5px] -translate-x-1/2" style={{ left: `${Math.min(100, s.riskScore)}%` }}>
+            <div className="h-0 w-0 border-x-[5px] border-t-[7px] border-x-transparent" style={{ borderTopColor: 'var(--ink)' }} />
+          </div>
+        </div>
+        <div className="mt-2 flex justify-between font-mono text-[10.5px] text-ink-4">
+          <span>0 · Low</span><span>40 · Watch</span><span>65 · Elevated</span><span>75+ · Critical</span>
+        </div>
+      </div>
+
+      <div className="mt-4 border-t border-line-2 pt-2">
+        <SectionHead>Risk drivers</SectionHead>
+        <DriverBar label="On-time delivery" value={s.onTimePct} target={95} display={`${s.onTimePct}%`} tone={onTimeTone(s.onTimePct)} />
+        <DriverBar label="Quality" value={s.qualityPct} target={90} display={`${s.qualityPct}/100`} tone={qualityTone(s.qualityPct)} />
+        <DriverBar label="NCR load" value={Math.min(100, s.ncrs * 33)} target={0} display={`${s.ncrs} open`} tone={ncrTone(s.ncrs)} higherBetter={false} />
+      </div>
+    </Card>
+  )
+}
+
 function OverviewTab({ s }: { s: Supplier }) {
   const qTone = qualityTone(s.qualityPct)
   const otTone = onTimeTone(s.onTimePct)
@@ -314,15 +382,27 @@ function OverviewTab({ s }: { s: Supplier }) {
         </div>
       </Card>
 
-      {/* Risk over time */}
-      <Card flat className="px-5 pt-4 pb-4">
-        <div className="mb-3 flex items-baseline justify-between">
-          <h3 className="m-0 text-[13px] font-semibold tracking-[-0.005em]">
-            Risk over time <span className="ml-2 font-mono text-[11px] font-normal text-ink-3">last 90 days</span>
+      {/* Risk profile — band position + drivers */}
+      <RiskProfile s={s} />
+
+      {/* Scorecard trend over time (the 12-point series is scorecard history) */}
+      <Card flat className="px-5 pt-4 pb-5">
+        <div className="mb-3.5 flex items-baseline justify-between">
+          <h3 className="m-0 text-[16px] font-semibold tracking-[-0.01em]">
+            Scorecard trend <span className="ml-2 font-mono text-[12px] font-normal text-ink-3">last 90 days</span>
           </h3>
-          <span className="font-mono text-[11px] text-ink-3">12-point trend</span>
+          <span className="font-mono text-[12px] text-ink-3">now <b className="font-semibold text-ink">{s.scorecard}</b>/100 · target 85</span>
         </div>
-        <AreaChart data={s.trend} color={riskColor(s.riskScore)} height={180} labels={['90d', '60d', '30d', 'now']} />
+        <AreaChart
+          data={s.trend}
+          color="var(--accent)"
+          height={210}
+          yDomain={[40, 100]}
+          labels={['90d', '60d', '30d', 'now']}
+          thresholds={[{ value: 85, label: 'target', color: 'var(--good)' }]}
+          formatValue={(v) => `${Math.round(v)}/100`}
+          pointLabel={(i) => (i === s.trend.length - 1 ? 'now' : `${Math.round(((s.trend.length - 1 - i) / (s.trend.length - 1)) * 90)}d ago`)}
+        />
       </Card>
 
       {/* Summary line */}
