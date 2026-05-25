@@ -192,6 +192,8 @@ export function getInsights(suppliers: Supplier[]): Insight[] {
       title: `${critical} suppliers sit in critical risk`,
       body: 'These carry the highest probability of disruption. Prioritise 8D containment and dual-sourcing before the next cycle.',
       metric: `${sum.atRisk} at risk total`,
+      href: '/suppliers?band=Critical',
+      action: 'See critical suppliers',
     },
   ]
   if (worstCat) {
@@ -201,6 +203,8 @@ export function getInsights(suppliers: Supplier[]): Insight[] {
       title: `${worstCat.category} carries the highest category risk`,
       body: `Average risk ${worstCat.avgRisk} across ${worstCat.count} suppliers — a structural exposure worth a category review.`,
       metric: `avg ${worstCat.avgRisk}`,
+      href: `/categories/${encodeURIComponent(worstCat.category)}`,
+      action: 'Review category',
     })
   }
   if (strategic) {
@@ -210,6 +214,8 @@ export function getInsights(suppliers: Supplier[]): Insight[] {
       title: 'Strategic spend is concentrated',
       body: `${eurM(strategic.spendEur)} flows through ${strategic.count} strategic suppliers — high spend and high risk demand the most oversight.`,
       metric: eurM(strategic.spendEur),
+      href: '/suppliers?segment=Strategic',
+      action: 'See strategic suppliers',
     })
   }
   if (bottleneck) {
@@ -219,6 +225,8 @@ export function getInsights(suppliers: Supplier[]): Insight[] {
       title: `${bottleneck.count} bottleneck suppliers, low spend but high risk`,
       body: 'Low leverage but disruption-prone. Build buffer stock or qualify alternates rather than chasing price.',
       metric: `avg ${bottleneck.avgRisk}`,
+      href: '/suppliers?segment=Bottleneck',
+      action: 'See bottleneck suppliers',
     })
   }
   out.push({
@@ -227,6 +235,8 @@ export function getInsights(suppliers: Supplier[]): Insight[] {
     title: 'DS-PKG-104 is single-source for cardboard',
     body: 'One supplier carries 100% of category spend. A single failure stops the line — qualify a second source.',
     metric: '100% of category',
+    href: '/suppliers/SUP-104',
+    action: 'Open supplier',
   })
   out.push({
     id: 'low-risk',
@@ -234,6 +244,8 @@ export function getInsights(suppliers: Supplier[]): Insight[] {
     title: `${lowRisk} suppliers are low-risk and stable`,
     body: 'The long tail of the portfolio is healthy — light-touch monitoring is enough, freeing attention for the critical few.',
     metric: `${lowRisk} in Low band`,
+    href: '/suppliers?band=Low',
+    action: 'See low-risk suppliers',
   })
   return out
 }

@@ -117,6 +117,8 @@ export type Insight = {
   title: string
   body: string
   metric?: string
+  href?: string       // drill-down target: filtered suppliers, a category, or a supplier
+  action?: string     // call-to-action label, e.g. "See critical suppliers"
 }
 
 export type EsgRating = 'A' | 'B' | 'C' | 'D'

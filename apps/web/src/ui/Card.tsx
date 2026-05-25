@@ -1,13 +1,14 @@
 import type { CSSProperties, ReactNode } from 'react'
 
-export function Card({ flat = false, children, className = '', style }: {
+export function Card({ flat = false, children, className = '', style, onClick }: {
   flat?: boolean
   children: ReactNode
   className?: string
   style?: CSSProperties
+  onClick?: () => void
 }) {
   return (
-    <div className={`bg-card border border-line ${flat ? 'rounded-lg' : 'rounded-[10px]'} ${className}`} style={style}>
+    <div onClick={onClick} className={`bg-card border border-line ${flat ? 'rounded-lg' : 'rounded-[10px]'} ${className}`} style={style}>
       {children}
     </div>
   )

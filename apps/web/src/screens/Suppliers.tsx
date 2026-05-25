@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AppShell } from '../ui/AppShell'
 import { Card } from '../ui/Card'
 import { Pill, type PillTone } from '../ui/Pill'
@@ -268,11 +268,19 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 export default function Suppliers() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const { data: all = [], isLoading, isError, error } = useSuppliersQuery()
   const [view, setView] = useState<ViewMode>('matrix')
-  const [q, setQ] = useState('')
-  const [segs, setSegs] = useState<Segment[]>([])
-  const [bands, setBands] = useState<RiskBand[]>([])
+  // Seed filters from the URL so insights / drill-downs can deep-link a filtered view.
+  const [q, setQ] = useState(() => params.get('q') ?? '')
+  const [segs, setSegs] = useState<Segment[]>(() => {
+    const s = params.get('segment')
+    return s && SEGMENTS.includes(s as Segment) ? [s as Segment] : []
+  })
+  const [bands, setBands] = useState<RiskBand[]>(() => {
+    const b = params.get('band')
+    return b && BANDS.includes(b as RiskBand) ? [b as RiskBand] : []
+  })
   const [country, setCountry] = useState('')
 
   const countries = useMemo(() => [...new Set(all.map((s) => s.country))].sort(), [all])
