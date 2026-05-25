@@ -41,6 +41,19 @@ export default function Spend() {
           <div><KPI label="Annualised" value={fmtMoney(data.totalEur)} note="all suppliers" /></div>
         </Card>
 
+        <Card flat className="mb-6 px-5 py-4">
+          <div className="mb-2.5 flex items-baseline justify-between">
+            <h3 className="m-0 text-[15px] font-semibold tracking-[-0.005em]">Budget utilization</h3>
+            <span className="font-mono text-[12.5px] text-ink-3">{fmtMoney(data.ytdEur)} of {fmtMoney(data.budgetEur)} · {Math.round((data.ytdEur / data.budgetEur) * 100)}%</span>
+          </div>
+          <div className="h-3.5 overflow-hidden rounded-full bg-line">
+            <div className="h-full rounded-full" style={{ width: `${Math.min(100, (data.ytdEur / data.budgetEur) * 100)}%`, background: variance < 0 ? 'var(--good)' : 'var(--bad)' }} />
+          </div>
+          <div className="mt-2 font-mono text-[11.5px] text-ink-4">
+            {variance < 0 ? `${fmtMoney(Math.abs(variance))} headroom remaining this year` : `${fmtMoney(variance)} over budget`}
+          </div>
+        </Card>
+
         <div className="mb-6 grid grid-cols-2 gap-4">
           <Card flat className="px-5 pt-4 pb-5">
             <SectionHead>By segment</SectionHead>
@@ -70,9 +83,9 @@ export default function Spend() {
               {data.topSuppliers.map((s) => (
                 <Tr key={s.id}>
                   <Td variant="name" className="p-0">
-                    <Link to={`/suppliers/${s.id}`} className="block px-3 py-[9px] text-ink no-underline">
-                      {s.name}
-                      <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{s.id}</span>
+                    <Link to={`/suppliers/${s.id}`} className="block px-3 py-2.5 text-ink no-underline">
+                      <span className="text-[14.5px] font-semibold">{s.name}</span>
+                      <span className="mt-0.5 block font-mono text-[12px] font-normal text-ink-3">{s.id}</span>
                     </Link>
                   </Td>
                   <Td variant="num">{s.spend}</Td>

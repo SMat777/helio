@@ -21,16 +21,17 @@ function Pillar({ label, value }: { label: string; value: number }) {
   const color = value >= 75 ? 'var(--good)' : value >= 55 ? 'var(--warn)' : 'var(--bad)'
   return (
     <div className="flex items-center gap-2">
-      <span className="font-mono text-[10px] uppercase text-ink-3">{label}</span>
-      <span className="font-mono text-[12px] font-semibold tabular-nums" style={{ color }}>{value}</span>
+      <span className="font-mono text-[11px] uppercase text-ink-3">{label}</span>
+      <span className="font-mono text-[13px] font-semibold tabular-nums" style={{ color }}>{value}</span>
     </div>
   )
 }
 
 export default function Esg() {
-  const { flagged, avg, aCount, scope2, dist } = useMemo(() => {
+  const { flagged, avg, aCount, scope2, dist, pillars } = useMemo(() => {
     const all = getEsg()
     const avg = Math.round(all.reduce((s, x) => s + x.overall, 0) / all.length)
+    const mean = (sel: (x: ReturnType<typeof getEsg>[number]) => number) => Math.round(all.reduce((s, x) => s + sel(x), 0) / all.length)
     const dist = RATINGS.map((r) => ({ rating: r, n: all.filter((x) => x.rating === r).length }))
     const flagged = all
       .filter((x) => x.rating === 'C' || x.rating === 'D')
@@ -42,6 +43,11 @@ export default function Esg() {
       aCount: all.filter((x) => x.rating === 'A').length,
       scope2: all.filter((x) => x.scope2Verified).length,
       dist,
+      pillars: [
+        { label: 'Environmental', value: mean((x) => x.e) },
+        { label: 'Social', value: mean((x) => x.s) },
+        { label: 'Governance', value: mean((x) => x.g) },
+      ],
     }
   }, [])
 
@@ -73,14 +79,31 @@ export default function Esg() {
                   <span className="h-2 overflow-hidden rounded-full bg-rail">
                     <span className="block h-full rounded-full" style={{ width: `${(d.n / distMax) * 100}%`, background: `var(--${ratingTone[d.rating] === 'muted' ? 'ink-4' : ratingTone[d.rating]})` }} />
                   </span>
-                  <span className="text-right font-mono text-[12px] tabular-nums text-ink">{d.n}</span>
+                  <span className="text-right font-mono text-[13px] tabular-nums text-ink">{d.n}</span>
                 </div>
               ))}
             </div>
           </Card>
-          <Card flat className="grid place-items-center px-5">
-            <p className="max-w-[52ch] text-center text-[13.5px] leading-[1.6] text-ink-2">
-              A and B ratings cover the bulk of the book. The work sits in the <b className="font-medium text-ink">C and D tail</b> — schedule audits and request remediation plans before the next ESG report cycle.
+          <Card flat className="px-5 pt-4 pb-5">
+            <SectionHead>Pillar averages</SectionHead>
+            <div className="flex flex-col gap-3.5">
+              {pillars.map((p) => {
+                const color = p.value >= 75 ? 'var(--good)' : p.value >= 55 ? 'var(--warn)' : 'var(--bad)'
+                return (
+                  <div key={p.label}>
+                    <div className="mb-1.5 flex items-baseline justify-between">
+                      <span className="text-[13.5px] text-ink-2">{p.label}</span>
+                      <span className="font-mono text-[14px] font-semibold tabular-nums" style={{ color }}>{p.value}<span className="text-ink-4">/100</span></span>
+                    </div>
+                    <span className="block h-2.5 overflow-hidden rounded-full bg-rail">
+                      <span className="block h-full rounded-full" style={{ width: `${p.value}%`, background: color }} />
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+            <p className="mt-4 border-t border-line-2 pt-3 text-[12.5px] leading-[1.55] text-ink-3">
+              The work sits in the <b className="font-medium text-ink">C and D tail</b> — schedule audits and request remediation plans before the next cycle.
             </p>
           </Card>
         </div>
@@ -97,9 +120,9 @@ export default function Esg() {
                 return (
                   <Tr key={x.supplierId}>
                     <Td variant="name" className="p-0">
-                      <Link to={`/suppliers/${x.supplierId}`} className="block px-3 py-[9px] text-ink no-underline">
-                        {s?.name ?? x.supplierId}
-                        <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{x.supplierId}</span>
+                      <Link to={`/suppliers/${x.supplierId}`} className="block px-3 py-2.5 text-ink no-underline">
+                        <span className="text-[14.5px] font-semibold">{s?.name ?? x.supplierId}</span>
+                        <span className="mt-0.5 block font-mono text-[12px] font-normal text-ink-3">{x.supplierId}</span>
                       </Link>
                     </Td>
                     <Td><Pill tone={ratingTone[x.rating]} dot>{x.rating}</Pill></Td>

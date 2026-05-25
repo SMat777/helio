@@ -36,9 +36,9 @@ function ScoreTable({ rows }: { rows: Supplier[] }) {
           {rows.map((s) => (
             <Tr key={s.id}>
               <Td variant="name" className="p-0">
-                <Link to={`/suppliers/${s.id}`} className="block px-3 py-[9px] text-ink no-underline">
-                  {s.name}
-                  <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{s.id} · Tier {s.tier}</span>
+                <Link to={`/suppliers/${s.id}`} className="block px-3 py-2.5 text-ink no-underline">
+                  <span className="text-[14.5px] font-semibold">{s.name}</span>
+                  <span className="mt-0.5 block font-mono text-[12px] font-normal text-ink-3">{s.id} · Tier {s.tier}</span>
                 </Link>
               </Td>
               <Td><Pill tone={SEGMENT_PILL[s.segment]}>{s.segment}</Pill></Td>
@@ -59,7 +59,7 @@ function ScoreTable({ rows }: { rows: Supplier[] }) {
 
 export default function Scorecards() {
   const { data: suppliers = [] } = useSuppliersQuery()
-  const { top, bottom, avg, tier1, onTarget } = useMemo(() => {
+  const { top, bottom, avg, tier1, onTarget, dist, total } = useMemo(() => {
     const all = [...suppliers].sort((a, b) => b.scorecard - a.scorecard)
     const avg = Math.round(all.reduce((s, x) => s + x.scorecard, 0) / all.length)
     return {
@@ -68,6 +68,12 @@ export default function Scorecards() {
       avg,
       tier1: all.filter((s) => s.tier === 1).length,
       onTarget: all.filter((s) => s.scorecard >= 85).length,
+      dist: [
+        { label: 'Excellent · ≥85', n: all.filter((s) => s.scorecard >= 85).length, color: 'var(--good)' },
+        { label: 'On track · 70–84', n: all.filter((s) => s.scorecard >= 70 && s.scorecard < 85).length, color: 'var(--warn)' },
+        { label: 'At risk · <70', n: all.filter((s) => s.scorecard < 70).length, color: 'var(--bad)' },
+      ],
+      total: all.length,
     }
   }, [suppliers])
 
@@ -80,10 +86,31 @@ export default function Scorecards() {
           lede="Composite scorecards blend on-time delivery, quality and open NCRs. The leaders earn lighter oversight; the laggards need a conversation."
         />
 
-        <Card flat className="mb-6 grid grid-cols-3">
+        <Card flat className="mb-4 grid grid-cols-3">
           <div className="border-r border-line"><KPI label="Avg scorecard" value={avg} unit="/100" note="portfolio" /></div>
           <div className="border-r border-line"><KPI label="Tier 1" value={tier1} note="suppliers" /></div>
           <div><KPI label="On target" value={onTarget} note="scorecard ≥ 85" /></div>
+        </Card>
+
+        <Card flat className="mb-6 px-5 py-4">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h3 className="m-0 text-[15px] font-semibold tracking-[-0.005em]">Score distribution</h3>
+            <span className="font-mono text-[12px] text-ink-3">n = {total}</span>
+          </div>
+          <div className="mb-3 flex h-3.5 overflow-hidden rounded-full bg-line">
+            {dist.map((d) => <div key={d.label} style={{ width: `${(d.n / total) * 100}%`, background: d.color }} title={`${d.label}: ${d.n}`} />)}
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {dist.map((d) => (
+              <div key={d.label} className="flex items-baseline gap-2">
+                <span className="mt-1 h-2.5 w-2.5 flex-none rounded-full" style={{ background: d.color }} />
+                <div>
+                  <div className="font-serif text-[20px] font-semibold leading-none tabular-nums">{d.n}</div>
+                  <div className="mt-1 font-mono text-[11.5px] text-ink-3">{d.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
 
         <SectionHead>Top performers</SectionHead>
