@@ -18,7 +18,6 @@ import { riskBand, riskColor } from '../lib/risk'
 import { toCsv, downloadCsv } from '../lib/csv'
 import { fmtMoney } from '../lib/format'
 import {
-  getSupplier,
   getContracts,
   getContacts,
   getDocuments,
@@ -28,6 +27,7 @@ import {
   type Contract,
   type NcrRow,
 } from '../lib/data'
+import { useSuppliersQuery } from '../lib/data/suppliersRepo'
 
 // Export a single supplier's headline fields as a one-row CSV.
 function exportSupplier(s: Supplier) {
@@ -404,9 +404,19 @@ function ScorecardTab({ s }: { s: Supplier }) {
 
 export default function SupplierDetail() {
   const { id = '' } = useParams()
-  const supplier = getSupplier(id)
+  // Source the supplier from the same query as the list, so a Postgres-backed
+  // supplier (incl. one just added) resolves here too — not only mock-seeded ids.
+  const { data: all = [], isLoading } = useSuppliersQuery()
+  const supplier = all.find((x) => x.id === id)
   const [active, setActive] = useState('overview')
 
+  if (isLoading && !supplier) {
+    return (
+      <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link></>}>
+        <div className="grid place-items-center py-32 font-mono text-[12.5px] text-ink-3">Loading supplier…</div>
+      </AppShell>
+    )
+  }
   if (!supplier) return <NotFound />
   const s = supplier
 
