@@ -99,3 +99,34 @@ export type SupplierDocument = {
   date: string
   sizeKb: number
 }
+
+export type SpendByKey = { key: string; eur: number; pct: number }
+
+export type SpendBreakdown = {
+  totalEur: number
+  ytdEur: number
+  budgetEur: number
+  byCategory: SpendByKey[]
+  bySegment: SpendByKey[]
+  topSuppliers: { id: string; name: string; eur: number; spend: string }[]
+}
+
+export type Insight = {
+  id: string
+  tone: Tone
+  title: string
+  body: string
+  metric?: string
+}
+
+export type EsgRating = 'A' | 'B' | 'C' | 'D'
+
+export type Esg = {
+  supplierId: string
+  e: number // environmental 0..100
+  s: number // social
+  g: number // governance
+  overall: number
+  rating: EsgRating
+  scope2Verified: boolean
+}

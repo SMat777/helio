@@ -4,13 +4,13 @@
 // signatures, and no screen changes. Screens import only from here.
 
 import { riskBand } from '../risk'
-import type { Supplier, ActivityEvent, Ncr, Segment } from '../types'
+import type { Supplier, ActivityEvent, Ncr, Segment, SpendByKey, SpendBreakdown, Insight } from '../types'
 import { SUPPLIERS, NEEDS_ATTENTION_IDS } from './suppliers'
 import { ACTIVITY } from './activity'
 import { NCR } from './ncr'
 
 export type { Supplier, ActivityEvent, Ncr, Segment } from '../types'
-export type { Contract, Contact, SupplierDocument, NcrRow, NcrSeverity, NcrStatus } from '../types'
+export type { Contract, Contact, SupplierDocument, NcrRow, NcrSeverity, NcrStatus, SpendBreakdown, SpendByKey, Insight, Esg, EsgRating } from '../types'
 
 // Detail-tab + portfolio accessors — same swap boundary as the rest of this module.
 export { getContracts } from './contracts'
@@ -18,6 +18,7 @@ export { getContacts } from './contacts'
 export { getDocuments } from './documents'
 export { getActivityForSupplier } from './activity'
 export { getNcrsForSupplier, getNcrs } from './ncr'
+export { getEsg } from './esg'
 
 export type Kpi = {
   label: string
@@ -137,4 +138,95 @@ export function getNcr(): Ncr {
 
 export function getNcrSummary(): { open: number; critical: number; dueThisWeek: number } {
   return { open: 23, critical: 5, dueThisWeek: 3 }
+}
+
+// ── Spend ────────────────────────────────────────────────────────────────--
+export function getSpendBreakdown(): SpendBreakdown {
+  const total = SUPPLIERS.reduce((sum, s) => sum + s.spendEur, 0)
+  const groupBy = (key: (s: Supplier) => string): SpendByKey[] => {
+    const m = new Map<string, number>()
+    for (const s of SUPPLIERS) m.set(key(s), (m.get(key(s)) ?? 0) + s.spendEur)
+    return [...m.entries()]
+      .map(([k, eur]) => ({ key: k, eur, pct: Math.round((eur / total) * 100) }))
+      .sort((a, b) => b.eur - a.eur)
+  }
+  const topSuppliers = [...SUPPLIERS]
+    .sort((a, b) => b.spendEur - a.spendEur)
+    .slice(0, 8)
+    .map((s) => ({ id: s.id, name: s.name, eur: s.spendEur, spend: s.spend }))
+  return {
+    totalEur: total,
+    ytdEur: 48_200_000,
+    budgetEur: 52_000_000,
+    byCategory: groupBy((s) => s.category),
+    bySegment: groupBy((s) => s.segment),
+    topSuppliers,
+  }
+}
+
+// ── Insights ───────────────────────────────────────────────────────────────
+// Rule-based findings derived from the existing views — no new raw data.
+export function getInsights(): Insight[] {
+  const sum = getRiskSummary()
+  const cats = getCategoryRisk(20)
+  const seg = getSegmentExposure()
+  const critical = sum.bands.find((b) => b.label === 'Critical')?.n ?? 0
+  const eurM = (eur: number) => `€${(eur / 1e6).toFixed(1)}M`
+
+  const worstCat = cats[0]
+  const strategic = seg.find((e) => e.segment === 'Strategic')
+  const bottleneck = seg.find((e) => e.segment === 'Bottleneck')
+  const lowRisk = sum.bands.find((b) => b.label === 'Low')?.n ?? 0
+
+  const out: Insight[] = [
+    {
+      id: 'critical-concentration',
+      tone: 'bad',
+      title: `${critical} suppliers sit in critical risk`,
+      body: 'These carry the highest probability of disruption. Prioritise 8D containment and dual-sourcing before the next cycle.',
+      metric: `${sum.atRisk} at risk total`,
+    },
+  ]
+  if (worstCat) {
+    out.push({
+      id: 'category-risk',
+      tone: 'warn',
+      title: `${worstCat.category} carries the highest category risk`,
+      body: `Average risk ${worstCat.avgRisk} across ${worstCat.count} suppliers — a structural exposure worth a category review.`,
+      metric: `avg ${worstCat.avgRisk}`,
+    })
+  }
+  if (strategic) {
+    out.push({
+      id: 'strategic-spend',
+      tone: 'warn',
+      title: 'Strategic spend is concentrated',
+      body: `${eurM(strategic.spendEur)} flows through ${strategic.count} strategic suppliers — high spend and high risk demand the most oversight.`,
+      metric: eurM(strategic.spendEur),
+    })
+  }
+  if (bottleneck) {
+    out.push({
+      id: 'bottleneck',
+      tone: 'warn',
+      title: `${bottleneck.count} bottleneck suppliers, low spend but high risk`,
+      body: 'Low leverage but disruption-prone. Build buffer stock or qualify alternates rather than chasing price.',
+      metric: `avg ${bottleneck.avgRisk}`,
+    })
+  }
+  out.push({
+    id: 'single-source',
+    tone: 'bad',
+    title: 'DS-PKG-104 is single-source for cardboard',
+    body: 'One supplier carries 100% of category spend. A single failure stops the line — qualify a second source.',
+    metric: '100% of category',
+  })
+  out.push({
+    id: 'low-risk',
+    tone: 'good',
+    title: `${lowRisk} suppliers are low-risk and stable`,
+    body: 'The long tail of the portfolio is healthy — light-touch monitoring is enough, freeing attention for the critical few.',
+    metric: `${lowRisk} in Low band`,
+  })
+  return out
 }
