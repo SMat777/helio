@@ -7,7 +7,10 @@ import NewNcr from './screens/NewNcr'
 import Ncrs from './screens/Ncrs'
 import Categories from './screens/Categories'
 import Scorecards from './screens/Scorecards'
-import Placeholder from './screens/Placeholder'
+import Contracts from './screens/Contracts'
+import Spend from './screens/Spend'
+import Esg from './screens/Esg'
+import Insights from './screens/Insights'
 import Showcase from './screens/Showcase'
 
 // Esc → back to dashboard from any non-root screen (HANDOFF §7), ignoring text fields.
@@ -37,11 +40,11 @@ export default function App() {
         <Route path="/ncr/new" element={<NewNcr />} />
         <Route path="/ncrs" element={<Ncrs />} />
         <Route path="/categories" element={<Categories />} />
-        <Route path="/contracts" element={<Placeholder title="Contracts" />} />
-        <Route path="/insights" element={<Placeholder title="Insights" />} />
+        <Route path="/contracts" element={<Contracts />} />
+        <Route path="/insights" element={<Insights />} />
         <Route path="/scorecards" element={<Scorecards />} />
-        <Route path="/esg" element={<Placeholder title="ESG" />} />
-        <Route path="/spend" element={<Placeholder title="Spend" />} />
+        <Route path="/esg" element={<Esg />} />
+        <Route path="/spend" element={<Spend />} />
         <Route path="/showcase" element={<Showcase />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
