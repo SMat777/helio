@@ -18,3 +18,7 @@ docs/
 design/
 CONTEXT.md
 CLAUDE_CODE_PROMPT.md
+
+# brainstorm visual companion — local only
+.superpowers/
+.vercel
