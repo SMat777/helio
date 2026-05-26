@@ -5,7 +5,7 @@ Procurement and supplier-risk frontend. 247 suppliers, 13 routes, Kraljic segmen
 **Live:** [helio-neon.vercel.app](https://helio-neon.vercel.app)
 **Stack:** React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · React Router 7 · TanStack Query 5 · Zustand 5 · Supabase · Vitest 4
 
-![Dashboard](public/screenshots/dashboard.png)
+![Dashboard](apps/web/public/screenshots/dashboard.png)
 
 ---
 
@@ -23,19 +23,19 @@ Procurement and supplier-risk frontend. 247 suppliers, 13 routes, Kraljic segmen
 
 **Suppliers · Kraljic matrix.** Strategic and Bottleneck columns carry the structural risk; sorted within each column by current score.
 
-![Suppliers matrix](public/screenshots/suppliers-matrix.png)
+![Suppliers matrix](apps/web/public/screenshots/suppliers-matrix.png)
 
 **Supplier detail.** Risk band with marker, scorecard trend, on-time and quality 90D, and a per-driver risk breakdown.
 
-![Supplier detail](public/screenshots/supplier-detail.png)
+![Supplier detail](apps/web/public/screenshots/supplier-detail.png)
 
 **Insights.** Auto-generated findings across risk, spend, and concentration. Each card links straight to the suppliers behind it.
 
-![Insights](public/screenshots/insights.png)
+![Insights](apps/web/public/screenshots/insights.png)
 
 **ESG.** Every supplier scored across environmental, social, and governance pillars. C and D ratings pull forward for the audit and remediation backlog.
 
-![ESG](public/screenshots/esg.png)
+![ESG](apps/web/public/screenshots/esg.png)
 
 ---
 
@@ -69,7 +69,7 @@ The repo is the swap line. Screens never know which backing store they're hittin
 - 164 modules · ~375 kB JS / 25 kB CSS
 - Deployed on Vercel with SPA rewrites
 
-**Live demo runs in-memory.** Mutations stay for the session and reset on reload — every visitor gets a clean slate. The Supabase backend (schema, RLS policies, 247-row seed) lives in [`supabase/`](../../supabase) and runs locally via `.env.local`.
+**Live demo runs in-memory.** Mutations stay for the session and reset on reload — every visitor gets a clean slate. The Supabase backend (schema, RLS policies, 247-row seed) lives in [`supabase/`](supabase) and runs locally via `.env.local`.
 
 ---
 
