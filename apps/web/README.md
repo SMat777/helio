@@ -67,7 +67,9 @@ The repo is the swap line. Screens never know which backing store they're hittin
 
 - 29 / 29 tests green · ESLint clean · strict TypeScript
 - 164 modules · ~375 kB JS / 25 kB CSS
-- Deployed on Vercel with SPA rewrites + Supabase Postgres (read + insert via RLS)
+- Deployed on Vercel with SPA rewrites
+
+**Live demo runs in-memory.** Mutations stay for the session and reset on reload — every visitor gets a clean slate. The Supabase backend (schema, RLS policies, 247-row seed) lives in [`supabase/`](../../supabase) and runs locally via `.env.local`.
 
 ---
 
