@@ -1,4 +1,11 @@
-const DECISIONS = [
+import type { ReactNode } from 'react'
+
+interface Decision {
+  title: string
+  why: ReactNode
+}
+
+const DECISIONS: Decision[] = [
   {
     title: 'Mock-first, swap later',
     why: <>Ship a vertical slice in days. The repo (<code>lib/data/suppliersRepo.ts</code>) is the swap line — screens never know which backing store they're hitting.</>,
@@ -29,14 +36,14 @@ export default function Decisions() {
         <p className="section-lead">The architecture choices that make Helio behave coherently across 13 routes.</p>
       </header>
 
-      <ul className="dec-grid">
+      <dl className="dec-grid">
         {DECISIONS.map((d) => (
-          <li className="dec-row" key={d.title}>
-            <div className="dec-title">{d.title}</div>
-            <div className="dec-why">{d.why}</div>
-          </li>
+          <div className="dec-row" key={d.title}>
+            <dt className="dec-title">{d.title}</dt>
+            <dd className="dec-why">{d.why}</dd>
+          </div>
         ))}
-      </ul>
+      </dl>
 
       <p className="dec-fineprint">
         <em>What's intentionally not here:</em> no multi-tenant auth, no realtime subscriptions, sub-entities deterministically seeded per supplier ID. Known migration frontier, not an accident.
