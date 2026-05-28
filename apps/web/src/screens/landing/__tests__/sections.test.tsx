@@ -53,13 +53,13 @@ describe('Cta', () => {
 })
 
 describe('Byline', () => {
-  test('renders attribution + github and linkedin links with safe rel', () => {
+  test('renders attribution + GitHub and LinkedIn box-links with safe rel', () => {
     render(<Byline />)
     expect(screen.getByRole('heading', { name: /about this build/i })).toBeInTheDocument()
-    const github = screen.getByRole('link', { name: /github\.com\/smat777/i })
+    const github = screen.getByRole('link', { name: /^github/i })
     expect(github).toHaveAttribute('href', 'https://github.com/SMat777')
     expect(github).toHaveAttribute('rel', expect.stringContaining('noopener'))
-    const linkedin = screen.getByRole('link', { name: /linkedin\.com\/in\/simonmathiasen-dev/i })
+    const linkedin = screen.getByRole('link', { name: /^linkedin/i })
     expect(linkedin).toHaveAttribute('href', expect.stringContaining('linkedin.com'))
   })
 })

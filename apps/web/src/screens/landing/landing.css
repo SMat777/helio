@@ -168,10 +168,23 @@
 
 /* === RISK === */
 .risk { padding-bottom: 60px; }
+
 .risk-viz {
-  display: grid; grid-template-columns: 1fr 1.5fr;
-  gap: 32px; align-items: start; margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 18px;
 }
+
+/* LEFT column: band-ladder on top, chart-axis card below.
+   Right column matches this combined height via align-items: stretch. */
+.risk-left {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+}
+
 .risk-ladder {
   list-style: none; display: grid; gap: 0;
   border-radius: 8px; overflow: hidden;
@@ -179,34 +192,82 @@
 }
 .risk-ladder li {
   padding: 16px 20px;
-  /* color set inline per band — light bands use dark ink for WCAG 1.4.3 */
   display: flex; justify-content: space-between; align-items: center;
 }
 .band-label { font-weight: 800; font-size: 16px; letter-spacing: -.01em; }
 .band-range { font-family: var(--font-mono); font-size: 13px; opacity: .9; }
 
-.risk-touch {
-  list-style: none; display: grid;
-  grid-template-columns: 1fr 1fr; gap: 12px;
-}
-.risk-touch li {
-  padding: 12px;
+/* Chart-axis card — tucked under the ladder, contained crop. */
+.risk-chart {
   border: 1px solid var(--ink); border-radius: 8px;
   background: var(--paper-2);
+  padding: 10px;
   display: grid; gap: 8px;
+  min-height: 0;
 }
-.touch-img {
-  border-radius: 6px; overflow: hidden;
+.risk-chart img {
+  display: block; width: 100%; height: auto;
+  max-height: 140px; object-fit: cover; object-position: center top;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+.risk-chart figcaption {
+  font-size: 13px; font-weight: 700; color: var(--ink);
+  text-align: center;
+}
+
+/* RIGHT column: custom 4-quadrant matrix-tile visualization. */
+.risk-right {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+}
+.risk-quadrants {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
   border: 1px solid var(--ink);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ink); /* gap shows as gridlines */
+  min-height: 0;
 }
-.touch-img img { display: block; width: 100%; height: auto; }
-.touch-label {
+.risk-quadrants li {
+  padding: 18px 20px;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+.risk-quadrants strong {
+  font-family: var(--font-serif);
+  font-size: 18px; font-weight: 800; letter-spacing: -.01em;
+}
+.risk-quadrants .quadrant-desc {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: .92;
+  letter-spacing: .02em;
+}
+.risk-right > .touch-label {
   font-size: 13px; font-weight: 700;
   color: var(--ink); text-align: center;
 }
 
+/* Bottom strip — tag-line and pills sit edge-to-edge across the grid width. */
+.risk-bottom {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
 .risk-tag {
-  margin-top: 24px; padding: 14px 18px;
+  flex: 1 1 280px;
+  padding: 14px 18px;
   border-left: 4px solid var(--accent);
   background: var(--paper-2);
   font-size: 16px;
@@ -215,10 +276,10 @@
 
 .risk-pills {
   list-style: none; display: flex; gap: 10px;
-  flex-wrap: wrap; margin-top: 14px;
+  flex-wrap: wrap;
 }
 .risk-pills li {
-  padding: 5px 12px;
+  padding: 6px 14px;
   border: 2px solid var(--ink); border-radius: 999px;
   font-family: var(--font-mono); font-size: 12px; font-weight: 700;
   background: var(--card);
@@ -275,11 +336,25 @@
 .byline p { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin-bottom: 10px; }
 .byline strong { color: var(--cta); font-weight: 800; }
 .byline-links {
-  font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .04em;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  margin-top: 6px;
 }
-.byline-links a { color: var(--accent); text-decoration: none; }
-.byline-links a:hover { text-decoration: underline; }
-.byline-links .sep { margin: 0 8px; color: var(--ink-2); }
+.byline-link {
+  display: inline-flex; align-items: center;
+  padding: 10px 22px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  font-family: var(--font-serif);
+  font-weight: 700; font-size: 14px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--card);
+  transition: background .15s ease, color .15s ease;
+}
+.byline-link:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
 
 /* === MOBILE (≤768px) === */
 @media (max-width: 768px) {

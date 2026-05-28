@@ -38,11 +38,26 @@ describe('RiskBandViz', () => {
     expect(critical.style.color).toBe('rgb(255, 255, 255)')
   })
 
-  test('renders 4 touchpoint images with descriptive alt text', () => {
+  test('renders chart-axis touchpoint with descriptive alt text', () => {
     render(<RiskBandViz />)
-    expect(screen.getByAltText(/kraljic matrix tile/i)).toBeInTheDocument()
-    expect(screen.getByAltText(/table row with risk-band badge/i)).toBeInTheDocument()
-    expect(screen.getByAltText(/chart with risk-band axis/i)).toBeInTheDocument()
-    expect(screen.getByAltText(/supplier detail page header/i)).toBeInTheDocument()
+    expect(screen.getByAltText(/scorecard trend chart with risk-band threshold/i)).toBeInTheDocument()
+  })
+
+  test('renders 4 Kraljic quadrants painted with the band-color palette', () => {
+    const { container } = render(<RiskBandViz />)
+    const items = container.querySelectorAll('.risk-quadrants li')
+    expect(items).toHaveLength(4)
+    const labels = Array.from(items).map((li) => li.querySelector('strong')?.textContent)
+    expect(labels).toEqual(['Strategic', 'Bottleneck', 'Leverage', 'Routine'])
+    // Strategic + Routine carry the dark/navy bands; light text.
+    const strategic = items[0] as HTMLElement
+    const routine = items[3] as HTMLElement
+    expect(strategic.style.color).toBe('rgb(255, 255, 255)')
+    expect(routine.style.color).toBe('rgb(255, 255, 255)')
+    // Bottleneck + Leverage carry the light bands; dark text for contrast.
+    const bottleneck = items[1] as HTMLElement
+    const leverage = items[2] as HTMLElement
+    expect(bottleneck.style.color).toBe('rgb(22, 19, 15)')
+    expect(leverage.style.color).toBe('rgb(22, 19, 15)')
   })
 })
