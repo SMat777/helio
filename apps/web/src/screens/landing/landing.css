@@ -168,7 +168,8 @@
   border: 1px solid var(--ink);
 }
 .risk-ladder li {
-  padding: 16px 20px; color: #fff;
+  padding: 16px 20px;
+  /* color set inline per band — light bands use dark ink for WCAG 1.4.3 */
   display: flex; justify-content: space-between; align-items: center;
 }
 .band-label { font-weight: 800; font-size: 16px; letter-spacing: -.01em; }
