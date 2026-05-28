@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { GITHUB_URL, DEMO_PATH } from './links'
 
 export default function Hero() {
   return (
@@ -10,7 +11,7 @@ export default function Hero() {
           <a href="#risk">Risk engine</a>
           <a href="#decisions">Decisions</a>
         </div>
-        <Link to="/app" className="hero-nav-cta" aria-label="Open the live demo">Open demo →</Link>
+        <Link to={DEMO_PATH} className="hero-nav-cta" aria-label="Open the live demo">Open demo →</Link>
       </nav>
 
       <h1 id="hero-h1" className="hero-h1">
@@ -22,9 +23,9 @@ export default function Hero() {
       </p>
 
       <div className="hero-cta">
-        <Link to="/app" className="btn-primary">Open the live demo →</Link>
+        <Link to={DEMO_PATH} className="btn-primary">Open the live demo →</Link>
         <a
-          href="https://github.com/SMat777/helio"
+          href={GITHUB_URL}
           className="btn-secondary"
           target="_blank"
           rel="noopener noreferrer"

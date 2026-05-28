@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { GITHUB_URL, DEMO_PATH } from './links'
 
 export default function Cta() {
   return (
@@ -8,9 +9,9 @@ export default function Cta() {
         <p className="section-lead">Mutations stay for the session and reset on reload — every visitor gets a clean slate.</p>
       </header>
       <div className="cta-buttons">
-        <Link to="/app" className="btn-primary btn-lg">Open the live demo →</Link>
+        <Link to={DEMO_PATH} className="btn-primary btn-lg">Open the live demo →</Link>
         <a
-          href="https://github.com/SMat777/helio"
+          href={GITHUB_URL}
           className="btn-secondary btn-lg"
           target="_blank"
           rel="noopener noreferrer"
