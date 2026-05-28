@@ -1,4 +1,4 @@
-import { useState, useRef, type KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
 
 type Lens = 'matrix' | 'table' | 'cards'
 
@@ -30,7 +30,19 @@ const LENS_KEYS: Lens[] = ['matrix', 'table', 'cards']
 
 export default function LensTabs() {
   const [active, setActive] = useState<Lens>('matrix')
+  const [isMobile, setIsMobile] = useState(false)
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+
+  // Below 768px all three lenses stack — a tablist with every panel visible
+  // is a broken ARIA pattern, so drop tab semantics there. jsdom returns
+  // `matches: false` for matchMedia, keeping tests on the desktop branch.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     const idx = LENS_KEYS.indexOf(active)
@@ -54,6 +66,31 @@ export default function LensTabs() {
       setActive(LENS_KEYS[last])
       tabRefs.current[last]?.focus()
     }
+  }
+
+  if (isMobile) {
+    return (
+      <section className="lenses" id="lenses" aria-labelledby="lenses-h" data-testid="landing-lenses">
+        <header className="section-head">
+          <h2 id="lenses-h">One portfolio. <span className="accent">Three lenses.</span></h2>
+          <p className="section-lead">Same 247 suppliers and the same risk model behind all three. The view changes; the data doesn't.</p>
+        </header>
+        <div className="lens-stack">
+          {LENS_KEYS.map((key) => (
+            <article key={key} className="lens-body lens-mobile" aria-labelledby={`mobile-lens-${key}`}>
+              <figure className="lens-vis">
+                <img src={LENSES[key].image} alt={LENSES[key].alt} />
+              </figure>
+              <div className="lens-cap">
+                <span className="lens-q">{LENSES[key].label}</span>
+                <h3 id={`mobile-lens-${key}`}>{LENSES[key].question}</h3>
+                <p>{LENSES[key].caption}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
   }
 
   const lens = LENSES[active]

@@ -283,9 +283,15 @@
   /* Problem */
   .pillars { grid-template-columns: 1fr; }
 
-  /* Lenses — DOM-branch in LensTabs (T022); fallback CSS hides tablist */
+  /* Lenses — DOM branch in LensTabs renders <article> stack on mobile */
   .lens-tabs { display: none; }
   .lens-body { grid-template-columns: 1fr; gap: 16px; }
+  .lens-stack { display: grid; gap: 24px; }
+  .lens-body.lens-mobile {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .lens-body.lens-mobile:last-child { border-bottom: none; }
 
   /* Risk — show only 2 of 4 touchpoints on mobile (spec §03 §4) */
   .risk-viz { grid-template-columns: 1fr; }
