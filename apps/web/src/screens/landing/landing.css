@@ -155,3 +155,60 @@
   margin-bottom: 10px;
 }
 .lens-cap p { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+
+/* === RISK === */
+.risk { padding-bottom: 60px; }
+.risk-viz {
+  display: grid; grid-template-columns: 1fr 1.5fr;
+  gap: 32px; align-items: start; margin-top: 18px;
+}
+.risk-ladder {
+  list-style: none; display: grid; gap: 0;
+  border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--ink);
+}
+.risk-ladder li {
+  padding: 16px 20px; color: #fff;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.band-label { font-weight: 800; font-size: 16px; letter-spacing: -.01em; }
+.band-range { font-family: var(--font-mono); font-size: 13px; opacity: .9; }
+
+.risk-touch {
+  list-style: none; display: grid;
+  grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.risk-touch li {
+  padding: 12px;
+  border: 1px solid var(--ink); border-radius: 8px;
+  background: var(--paper-2);
+  display: grid; gap: 8px;
+}
+.touch-img {
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--ink);
+}
+.touch-img img { display: block; width: 100%; height: auto; }
+.touch-label {
+  font-size: 13px; font-weight: 700;
+  color: var(--ink); text-align: center;
+}
+
+.risk-tag {
+  margin-top: 24px; padding: 14px 18px;
+  border-left: 4px solid var(--accent);
+  background: var(--paper-2);
+  font-size: 16px;
+}
+.risk-tag em { font-style: italic; color: var(--ink); font-weight: 700; }
+
+.risk-pills {
+  list-style: none; display: flex; gap: 10px;
+  flex-wrap: wrap; margin-top: 14px;
+}
+.risk-pills li {
+  padding: 5px 12px;
+  border: 2px solid var(--ink); border-radius: 999px;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  background: var(--card);
+}
