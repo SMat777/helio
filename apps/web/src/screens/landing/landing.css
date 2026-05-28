@@ -84,3 +84,34 @@
   border: 1px solid var(--line);
 }
 .hero-peek img { display: block; width: 100%; height: auto; }
+
+/* === SECTION SHARED === */
+.section-head {
+  margin-bottom: 32px; padding-top: 60px;
+  border-top: 1px solid var(--ink);
+}
+.section-head h2 {
+  font-size: clamp(28px, 4.5vw, 42px);
+  font-weight: 800; letter-spacing: -.015em; margin-bottom: 10px;
+}
+.section-head h2 .accent { color: var(--cta); }
+.section-lead {
+  font-size: 17px; color: var(--ink-2);
+  max-width: 56ch; line-height: 1.5;
+}
+
+/* === PROBLEM === */
+.problem { padding-bottom: 60px; }
+.pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.pillar {
+  padding: 22px 24px;
+  border-left: 4px solid var(--cta);
+  background: var(--paper-2);
+  border-radius: 0 8px 8px 0;
+}
+.pillar h3 { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+.pillar p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.pillar p em {
+  color: var(--accent);
+  font-style: italic; font-weight: 600;
+}
