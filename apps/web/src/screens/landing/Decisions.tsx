@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 interface Decision {
   title: string
@@ -29,6 +29,17 @@ const DECISIONS: Decision[] = [
 ]
 
 export default function Decisions() {
+  // Desktop = all matrix rows expanded by default. Mobile = collapsed accordion
+  // per spec §02 ("title visible, 'why' expandable via <details>").
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
   return (
     <section className="decisions" id="decisions" aria-labelledby="decisions-h" data-testid="landing-decisions">
       <header className="section-head">
@@ -38,7 +49,7 @@ export default function Decisions() {
 
       <div className="dec-grid">
         {DECISIONS.map((d) => (
-          <details className="dec-row" key={d.title} open>
+          <details className="dec-row" key={d.title} open={!isMobile}>
             <summary className="dec-title">{d.title}</summary>
             <div className="dec-why">{d.why}</div>
           </details>

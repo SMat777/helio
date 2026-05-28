@@ -25,8 +25,8 @@ describe('Decisions', () => {
     expect(screen.getByRole('heading', { name: /five decisions/i })).toBeInTheDocument()
     const rows = container.querySelectorAll('details.dec-row')
     expect(rows).toHaveLength(5)
-    // `open` attribute keeps content visible on desktop where CSS suppresses
-    // the disclosure chrome; mobile CSS toggles it off via [open] selector.
+    // Desktop default (jsdom matchMedia returns false): rows render open.
+    // Mobile flips the `open` attribute off via the matchMedia effect.
     rows.forEach((row) => expect(row).toHaveAttribute('open'))
     const titles = Array.from(container.querySelectorAll('summary.dec-title')).map((s) => s.textContent)
     expect(titles).toEqual([
