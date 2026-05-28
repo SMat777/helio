@@ -1,9 +1,13 @@
+// Text color paired with each band background. Light bands use dark text to
+// keep contrast ≥ 4.5:1 (WCAG 1.4.3). Computed at locked-palette time:
+// - #c14b2a on white = 4.55:1 ✓ · #1f3a5f on white = 11.6:1 ✓
+// - #d4a23a on white = 2.13:1 ✗ · #a8a085 on white = 2.74:1 ✗ → use dark text
 const BANDS = [
-  { label: 'Critical', range: '> 75', color: '#c14b2a' },
-  { label: 'Elevated', range: '66–75', color: '#d4a23a' },
-  { label: 'Watch', range: '41–65', color: '#a8a085' },
-  { label: 'Low', range: '≤ 40', color: '#1f3a5f' },
-]
+  { label: 'Critical', range: '> 75', color: '#c14b2a', text: '#fff' },
+  { label: 'Elevated', range: '66–75', color: '#d4a23a', text: '#16130f' },
+  { label: 'Watch',    range: '41–65', color: '#a8a085', text: '#16130f' },
+  { label: 'Low',      range: '≤ 40', color: '#1f3a5f', text: '#fff' },
+] as const
 
 const TOUCHPOINTS = [
   { label: 'Matrix tile color', image: '/screenshots/touch-matrix-tile.png', alt: 'Kraljic matrix tile colored by risk band' },
@@ -25,7 +29,7 @@ export default function RiskBandViz() {
       <div className="risk-viz">
         <ul className="risk-ladder">
           {BANDS.map((b) => (
-            <li key={b.label} style={{ background: b.color }}>
+            <li key={b.label} style={{ background: b.color, color: b.text }}>
               <span className="band-label">{b.label}</span>
               <span className="band-range">{b.range}</span>
             </li>
