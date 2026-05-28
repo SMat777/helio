@@ -8,15 +8,6 @@ const BANDS = [
   { label: 'Low',      range: '≤ 40', color: '#1f3a5f', text: '#fff' },
 ] as const
 
-// Kraljic quadrants painted with the same band-colors — visualizes how the
-// risk module drives every tile in the matrix (touchpoint #1).
-const QUADRANTS = [
-  { label: 'Strategic',  desc: 'High spend · High risk', color: '#c14b2a', text: '#fff' },
-  { label: 'Bottleneck', desc: 'Low spend · High risk',  color: '#d4a23a', text: '#16130f' },
-  { label: 'Leverage',   desc: 'High spend · Low risk',  color: '#a8a085', text: '#16130f' },
-  { label: 'Routine',    desc: 'Low spend · Low risk',   color: '#1f3a5f', text: '#fff' },
-] as const
-
 export default function RiskBandViz() {
   return (
     <section className="risk" id="risk" aria-labelledby="risk-h" data-testid="landing-risk">
@@ -28,6 +19,7 @@ export default function RiskBandViz() {
       </header>
 
       <div className="risk-viz">
+        {/* Col 1: band-ladder stacked over chart-axis mini-card. */}
         <div className="risk-left">
           <ul className="risk-ladder">
             {BANDS.map((b) => (
@@ -43,17 +35,17 @@ export default function RiskBandViz() {
           </figure>
         </div>
 
-        <div className="risk-right">
-          <ul className="risk-quadrants" aria-label="Kraljic matrix tile colors">
-            {QUADRANTS.map((q) => (
-              <li key={q.label} style={{ background: q.color, color: q.text }}>
-                <strong>{q.label}</strong>
-                <span className="quadrant-desc">{q.desc}</span>
-              </li>
-            ))}
-          </ul>
-          <span className="touch-label">Matrix tile color</span>
-        </div>
+        {/* Col 2: Strategic quadrant supplier-list — shows risk-band colors propagating into Matrix tiles. */}
+        <figure className="risk-touch">
+          <img src="/screenshots/touch-matrix-tile.png" alt="Strategic Kraljic quadrant with suppliers colored by risk band" />
+          <figcaption>Matrix tile color</figcaption>
+        </figure>
+
+        {/* Col 3: Table cell badge touchpoint. */}
+        <figure className="risk-touch">
+          <img src="/screenshots/touch-table-badge.png" alt="Supplier table row with risk-band badge" />
+          <figcaption>Table cell badge</figcaption>
+        </figure>
       </div>
 
       <div className="risk-bottom">
