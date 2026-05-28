@@ -14,20 +14,20 @@ const NAV: NavGroup[] = [
   {
     section: 'Workspace',
     items: [
-      { label: 'Dashboard', to: '/', icon: 'grid', end: true },
-      { label: 'Suppliers', to: '/suppliers', icon: 'building', trail: '247' },
-      { label: 'Categories', to: '/categories', icon: 'folder' },
-      { label: 'Contracts', to: '/contracts', icon: 'doc', warn: 9 },
-      { label: 'NCRs', to: '/ncrs', icon: 'warn', bad: 3 },
-      { label: 'Insights', to: '/insights', icon: 'sparkle' },
+      { label: 'Dashboard', to: '/app', icon: 'grid', end: true },
+      { label: 'Suppliers', to: '/app/suppliers', icon: 'building', trail: '247' },
+      { label: 'Categories', to: '/app/categories', icon: 'folder' },
+      { label: 'Contracts', to: '/app/contracts', icon: 'doc', warn: 9 },
+      { label: 'NCRs', to: '/app/ncrs', icon: 'warn', bad: 3 },
+      { label: 'Insights', to: '/app/insights', icon: 'sparkle' },
     ],
   },
   {
     section: 'Reports',
     items: [
-      { label: 'Scorecards', to: '/scorecards', icon: 'chart' },
-      { label: 'ESG', to: '/esg', icon: 'chart' },
-      { label: 'Spend', to: '/spend', icon: 'chart' },
+      { label: 'Scorecards', to: '/app/scorecards', icon: 'chart' },
+      { label: 'ESG', to: '/app/esg', icon: 'chart' },
+      { label: 'Spend', to: '/app/spend', icon: 'chart' },
     ],
   },
 ]
