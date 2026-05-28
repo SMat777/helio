@@ -20,12 +20,15 @@ describe('Problem', () => {
 })
 
 describe('Decisions', () => {
-  test('renders 5 decision rows as description-list entries', () => {
+  test('renders 5 decision rows as disclosure widgets (desktop = open, mobile = accordion)', () => {
     const { container } = render(<Decisions />)
     expect(screen.getByRole('heading', { name: /five decisions/i })).toBeInTheDocument()
-    const terms = container.querySelectorAll('dt')
-    expect(terms).toHaveLength(5)
-    const titles = Array.from(terms).map((dt) => dt.textContent)
+    const rows = container.querySelectorAll('details.dec-row')
+    expect(rows).toHaveLength(5)
+    // `open` attribute keeps content visible on desktop where CSS suppresses
+    // the disclosure chrome; mobile CSS toggles it off via [open] selector.
+    rows.forEach((row) => expect(row).toHaveAttribute('open'))
+    const titles = Array.from(container.querySelectorAll('summary.dec-title')).map((s) => s.textContent)
     expect(titles).toEqual([
       'Mock-first, swap later',
       'One risk module',
