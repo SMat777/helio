@@ -115,3 +115,43 @@
   color: var(--accent);
   font-style: italic; font-weight: 600;
 }
+
+/* === LENSES === */
+.lenses { padding-bottom: 60px; }
+.lens-tabs {
+  display: flex; gap: 0;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 22px;
+}
+.lens-tab {
+  padding: 12px 22px; background: transparent; border: none;
+  font-family: inherit; font-weight: 700; font-size: 14px;
+  color: var(--ink-2); cursor: pointer;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+}
+.lens-tab.active {
+  color: var(--ink);
+  font-weight: 800;  /* weight differential, not color-only (WCAG 1.4.1) */
+  border-bottom-color: var(--cta);
+}
+
+.lens-body {
+  display: grid; grid-template-columns: 5fr 3fr;
+  gap: 28px; align-items: start;
+}
+.lens-vis {
+  border: 1px solid var(--ink);
+  border-radius: 8px; overflow: hidden;
+}
+.lens-vis img { display: block; width: 100%; height: auto; }
+.lens-cap .lens-q {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--cta);
+  text-transform: uppercase; letter-spacing: .1em; font-weight: 700;
+  display: block; margin-bottom: 8px;
+}
+.lens-cap h3 {
+  font-size: 22px; font-weight: 800; letter-spacing: -.01em;
+  margin-bottom: 10px;
+}
+.lens-cap p { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
