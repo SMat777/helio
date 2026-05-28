@@ -6,15 +6,15 @@ import { searchItems, type SearchItem } from '../lib/search'
 
 // Static destinations — mirror the sidebar routes (kilde: AppShell NAV).
 const PAGES: SearchItem[] = [
-  { to: '/', title: 'Dashboard', subtitle: 'Workspace overview', kind: 'page', terms: ['home'] },
-  { to: '/suppliers', title: 'Suppliers', subtitle: 'Portfolio · Kraljic matrix', kind: 'page', terms: ['vendors', 'matrix'] },
-  { to: '/categories', title: 'Categories', subtitle: 'Spend categories', kind: 'page' },
-  { to: '/contracts', title: 'Contracts', subtitle: 'Agreements', kind: 'page' },
-  { to: '/ncr/new', title: 'NCRs', subtitle: 'Non-conformance reports', kind: 'page', terms: ['quality', 'ncr'] },
-  { to: '/insights', title: 'Insights', subtitle: 'Portfolio findings', kind: 'page' },
-  { to: '/scorecards', title: 'Scorecards', subtitle: 'Supplier scoring', kind: 'page' },
-  { to: '/esg', title: 'ESG', subtitle: 'Environmental · Social · Governance', kind: 'page' },
-  { to: '/spend', title: 'Spend', subtitle: 'Spend analysis', kind: 'page' },
+  { to: '/app', title: 'Dashboard', subtitle: 'Workspace overview', kind: 'page', terms: ['home'] },
+  { to: '/app/suppliers', title: 'Suppliers', subtitle: 'Portfolio · Kraljic matrix', kind: 'page', terms: ['vendors', 'matrix'] },
+  { to: '/app/categories', title: 'Categories', subtitle: 'Spend categories', kind: 'page' },
+  { to: '/app/contracts', title: 'Contracts', subtitle: 'Agreements', kind: 'page' },
+  { to: '/app/ncr/new', title: 'NCRs', subtitle: 'Non-conformance reports', kind: 'page', terms: ['quality', 'ncr'] },
+  { to: '/app/insights', title: 'Insights', subtitle: 'Portfolio findings', kind: 'page' },
+  { to: '/app/scorecards', title: 'Scorecards', subtitle: 'Supplier scoring', kind: 'page' },
+  { to: '/app/esg', title: 'ESG', subtitle: 'Environmental · Social · Governance', kind: 'page' },
+  { to: '/app/spend', title: 'Spend', subtitle: 'Spend analysis', kind: 'page' },
 ]
 
 // Mounted only while open (AppShell gates it), so state starts fresh each time —
@@ -27,7 +27,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
   // Built once — supplier list is stable for the session.
   const items = useMemo<SearchItem[]>(() => {
     const suppliers: SearchItem[] = getSuppliers().map((s) => ({
-      to: `/suppliers/${s.id}`,
+      to: `/app/suppliers/${s.id}`,
       title: s.name,
       subtitle: `${s.id} · ${s.category}`,
       kind: 'supplier',
