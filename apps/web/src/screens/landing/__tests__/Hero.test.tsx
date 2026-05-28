@@ -11,13 +11,16 @@ function renderHero() {
 describe('Hero', () => {
   test('renders the README-mirror headline', () => {
     renderHero()
-    expect(screen.getByText(/three lenses/i)).toBeInTheDocument()
-    expect(screen.getByText(/one risk model/i)).toBeInTheDocument()
+    const h1 = screen.getByRole('heading', { level: 1 })
+    expect(h1).toHaveTextContent(/three lenses/i)
+    expect(h1).toHaveTextContent(/one risk model/i)
   })
 
   test('primary CTA links to /app', () => {
     renderHero()
-    const cta = screen.getByRole('link', { name: /open the live demo/i })
+    // Exact accessible-name match — nav-CTA's aria-label is "Open the live demo"
+    // (without arrow), so this only matches the primary in-hero CTA.
+    const cta = screen.getByRole('link', { name: 'Open the live demo →' })
     expect(cta).toHaveAttribute('href', '/app')
   })
 
