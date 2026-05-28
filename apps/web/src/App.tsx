@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import Dashboard from './screens/Dashboard'
 import Suppliers from './screens/Suppliers'
@@ -15,7 +15,10 @@ import Esg from './screens/Esg'
 import Insights from './screens/Insights'
 import Showcase from './screens/Showcase'
 
-// Esc → back to dashboard from any non-root screen (HANDOFF §7), ignoring text fields.
+const Landing = lazy(() => import('./screens/Landing'))
+
+// Esc → return to root of current context.
+// /app/* → /app · / and /app → no-op (already at root).
 function KeyboardNav() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -23,7 +26,9 @@ function KeyboardNav() {
     function onKey(e: KeyboardEvent) {
       const el = e.target as HTMLElement | null
       const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
-      if (e.key === 'Escape' && !typing && pathname !== '/') navigate('/')
+      if (e.key !== 'Escape' || typing) return
+      if (pathname === '/' || pathname === '/app') return
+      if (pathname.startsWith('/app')) navigate('/app')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -36,20 +41,25 @@ export default function App() {
     <BrowserRouter>
       <KeyboardNav />
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/suppliers" element={<Suppliers />} />
-        <Route path="/suppliers/new" element={<NewSupplier />} />
-        <Route path="/suppliers/:id" element={<SupplierDetail />} />
-        <Route path="/ncr/new" element={<NewNcr />} />
-        <Route path="/ncrs" element={<Ncrs />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/categories/:key" element={<CategoryDetail />} />
-        <Route path="/contracts" element={<Contracts />} />
-        <Route path="/insights" element={<Insights />} />
-        <Route path="/scorecards" element={<Scorecards />} />
-        <Route path="/esg" element={<Esg />} />
-        <Route path="/spend" element={<Spend />} />
-        <Route path="/showcase" element={<Showcase />} />
+        <Route path="/" element={
+          <Suspense fallback={null}>
+            <Landing />
+          </Suspense>
+        } />
+        <Route path="/app" element={<Dashboard />} />
+        <Route path="/app/suppliers" element={<Suppliers />} />
+        <Route path="/app/suppliers/new" element={<NewSupplier />} />
+        <Route path="/app/suppliers/:id" element={<SupplierDetail />} />
+        <Route path="/app/ncr/new" element={<NewNcr />} />
+        <Route path="/app/ncrs" element={<Ncrs />} />
+        <Route path="/app/categories" element={<Categories />} />
+        <Route path="/app/categories/:key" element={<CategoryDetail />} />
+        <Route path="/app/contracts" element={<Contracts />} />
+        <Route path="/app/insights" element={<Insights />} />
+        <Route path="/app/scorecards" element={<Scorecards />} />
+        <Route path="/app/esg" element={<Esg />} />
+        <Route path="/app/spend" element={<Spend />} />
+        <Route path="/app/showcase" element={<Showcase />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
