@@ -245,3 +245,8 @@
   font-size: 14.5px; line-height: 1.55;
 }
 .dec-fineprint em { color: var(--cta); font-style: italic; font-weight: 700; }
+
+/* === CTA === */
+.cta-block { padding-bottom: 50px; }
+.cta-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn-lg { padding: 18px 32px; font-size: 17px; border-radius: 10px; }
