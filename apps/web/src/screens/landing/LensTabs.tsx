@@ -34,24 +34,25 @@ export default function LensTabs() {
 
   function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     const idx = LENS_KEYS.indexOf(active)
+    const last = LENS_KEYS.length - 1
     if (e.key === 'ArrowRight') {
       e.preventDefault()
-      const n = (idx + 1) % 3
+      const n = (idx + 1) % LENS_KEYS.length
       setActive(LENS_KEYS[n])
       tabRefs.current[n]?.focus()
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault()
-      const n = (idx + 2) % 3
+      const n = (idx + last) % LENS_KEYS.length
       setActive(LENS_KEYS[n])
       tabRefs.current[n]?.focus()
     } else if (e.key === 'Home') {
       e.preventDefault()
-      setActive('matrix')
+      setActive(LENS_KEYS[0])
       tabRefs.current[0]?.focus()
     } else if (e.key === 'End') {
       e.preventDefault()
-      setActive('cards')
-      tabRefs.current[2]?.focus()
+      setActive(LENS_KEYS[last])
+      tabRefs.current[last]?.focus()
     }
   }
 
@@ -78,7 +79,7 @@ export default function LensTabs() {
             id={`tab-${key}`}
             role="tab"
             aria-selected={active === key}
-            aria-controls={`panel-${key}`}
+            aria-controls="panel-lens"
             tabIndex={active === key ? 0 : -1}
             className={`lens-tab ${active === key ? 'active' : ''}`}
             onClick={() => setActive(key)}
@@ -89,7 +90,7 @@ export default function LensTabs() {
       </div>
 
       <div
-        id={`panel-${active}`}
+        id="panel-lens"
         role="tabpanel"
         aria-labelledby={`tab-${active}`}
         tabIndex={0}
