@@ -2,8 +2,10 @@
 
 Procurement and supplier-risk frontend. 247 suppliers, 13 routes, Kraljic segmentation, risk scoring, scorecards, NCRs, ESG, spend, contracts.
 
-**Live:** [helio-neon.vercel.app](https://helio-neon.vercel.app)
+**Live:** [helio-neon.vercel.app](https://helio-neon.vercel.app) — lands on a product-story page; the dashboard is at `/app`.
 **Stack:** React 19 · TypeScript 6 · Vite 8 · Tailwind v4 · React Router 7 · TanStack Query 5 · Zustand 5 · Supabase · Vitest 4
+
+![Landing](apps/web/public/screenshots/landing.png)
 
 ![Dashboard](apps/web/public/screenshots/dashboard.png)
 
