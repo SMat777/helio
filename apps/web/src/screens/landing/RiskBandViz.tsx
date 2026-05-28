@@ -14,7 +14,7 @@ const TOUCHPOINTS = [
   { label: 'Table cell badge', image: '/screenshots/touch-table-badge.png', alt: 'Supplier table row with risk-band badge' },
   { label: 'Chart axis threshold', image: '/screenshots/touch-chart-axis.png', alt: 'Chart with risk-band axis thresholds' },
   { label: 'Supplier-detail header', image: '/screenshots/touch-supplier-header.png', alt: 'Supplier detail page header with risk-band indicator' },
-]
+] as const
 
 export default function RiskBandViz() {
   return (
