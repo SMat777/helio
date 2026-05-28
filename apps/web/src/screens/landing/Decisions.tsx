@@ -36,14 +36,14 @@ export default function Decisions() {
         <p className="section-lead">The architecture choices that make Helio behave coherently across 13 routes.</p>
       </header>
 
-      <dl className="dec-grid">
+      <div className="dec-grid">
         {DECISIONS.map((d) => (
-          <div className="dec-row" key={d.title}>
-            <dt className="dec-title">{d.title}</dt>
-            <dd className="dec-why">{d.why}</dd>
-          </div>
+          <details className="dec-row" key={d.title} open>
+            <summary className="dec-title">{d.title}</summary>
+            <div className="dec-why">{d.why}</div>
+          </details>
         ))}
-      </dl>
+      </div>
 
       <p className="dec-fineprint">
         <em>What's intentionally not here:</em> no multi-tenant auth, no realtime subscriptions, sub-entities deterministically seeded per supplier ID. Known migration frontier, not an accident.
