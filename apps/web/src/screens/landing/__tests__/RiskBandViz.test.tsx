@@ -38,26 +38,10 @@ describe('RiskBandViz', () => {
     expect(critical.style.color).toBe('rgb(255, 255, 255)')
   })
 
-  test('renders chart-axis touchpoint with descriptive alt text', () => {
+  test('renders the three touchpoint images', () => {
     render(<RiskBandViz />)
     expect(screen.getByAltText(/scorecard trend chart with risk-band threshold/i)).toBeInTheDocument()
-  })
-
-  test('renders 4 Kraljic quadrants painted with the band-color palette', () => {
-    const { container } = render(<RiskBandViz />)
-    const items = container.querySelectorAll('.risk-quadrants li')
-    expect(items).toHaveLength(4)
-    const labels = Array.from(items).map((li) => li.querySelector('strong')?.textContent)
-    expect(labels).toEqual(['Strategic', 'Bottleneck', 'Leverage', 'Routine'])
-    // Strategic + Routine carry the dark/navy bands; light text.
-    const strategic = items[0] as HTMLElement
-    const routine = items[3] as HTMLElement
-    expect(strategic.style.color).toBe('rgb(255, 255, 255)')
-    expect(routine.style.color).toBe('rgb(255, 255, 255)')
-    // Bottleneck + Leverage carry the light bands; dark text for contrast.
-    const bottleneck = items[1] as HTMLElement
-    const leverage = items[2] as HTMLElement
-    expect(bottleneck.style.color).toBe('rgb(22, 19, 15)')
-    expect(leverage.style.color).toBe('rgb(22, 19, 15)')
+    expect(screen.getByAltText(/strategic kraljic quadrant/i)).toBeInTheDocument()
+    expect(screen.getByAltText(/supplier table row with risk-band badge/i)).toBeInTheDocument()
   })
 })
