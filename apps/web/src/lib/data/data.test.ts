@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getSuppliers, getSupplier, getNeedsAttention, getRiskSummary, getSegmentExposure, getConcentration } from './index'
+import { getSuppliers, getSupplier, getNeedsAttention, getRiskSummary, getSegmentExposure, getConcentration, getRecommendations } from './index'
 
 describe('supplier dataset', () => {
   it('has 247 suppliers (12 named + 235 synthetic)', () => {
@@ -56,5 +56,23 @@ describe('getConcentration', () => {
     expect(c.singleSourceEur).toBeGreaterThan(0)
     expect(c.singleSource.length).toBeGreaterThan(0)
     expect(c.singleSource.length).toBeLessThanOrEqual(5)
+  })
+})
+
+describe('getRecommendations', () => {
+  it('returns a ranked, deduplicated action plan with quantified impact', () => {
+    const recs = getRecommendations(getSuppliers())
+    expect(recs.length).toBeGreaterThan(0)
+    expect(recs.length).toBeLessThanOrEqual(8)
+    // ranks are sequential 1..N
+    expect(recs.map((r) => r.rank)).toEqual(recs.map((_, i) => i + 1))
+    // one move per supplier (aggregate moves have no supplierId)
+    const ids = recs.filter((r) => r.supplierId).map((r) => r.supplierId)
+    expect(new Set(ids).size).toBe(ids.length)
+    // breadth: the plan carries both risk moves and money moves
+    expect(recs.some((r) => r.riskDelta > 0)).toBe(true)
+    expect(recs.some((r) => r.eurImpact > 0)).toBe(true)
+    // the highest-risk critical supplier leads the plan
+    expect(recs[0].kind).toBe('dual-source')
   })
 })

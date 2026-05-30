@@ -20,6 +20,7 @@ const NAV: NavGroup[] = [
       { label: 'Contracts', to: '/app/contracts', icon: 'doc', warn: 9 },
       { label: 'NCRs', to: '/app/ncrs', icon: 'warn', bad: 3 },
       { label: 'Insights', to: '/app/insights', icon: 'sparkle' },
+      { label: 'Actions', to: '/app/actions', icon: 'check' },
     ],
   },
   {
