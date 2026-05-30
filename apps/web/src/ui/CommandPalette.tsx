@@ -12,6 +12,8 @@ const PAGES: SearchItem[] = [
   { to: '/app/contracts', title: 'Contracts', subtitle: 'Agreements', kind: 'page' },
   { to: '/app/ncr/new', title: 'NCRs', subtitle: 'Non-conformance reports', kind: 'page', terms: ['quality', 'ncr'] },
   { to: '/app/insights', title: 'Insights', subtitle: 'Portfolio findings', kind: 'page' },
+  { to: '/app/actions', title: 'Actions', subtitle: 'Prioritised action plan', kind: 'page', terms: ['recommendations', 'next'] },
+  { to: '/app/briefing', title: 'Briefing', subtitle: 'Executive one-pager', kind: 'page', terms: ['summary', 'board', 'exec'] },
   { to: '/app/scorecards', title: 'Scorecards', subtitle: 'Supplier scoring', kind: 'page' },
   { to: '/app/esg', title: 'ESG', subtitle: 'Environmental · Social · Governance', kind: 'page' },
   { to: '/app/spend', title: 'Spend', subtitle: 'Spend analysis', kind: 'page' },

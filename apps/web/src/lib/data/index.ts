@@ -91,7 +91,7 @@ export function getRiskSummary(all: Supplier[]): RiskSummary {
     total: all.length,
     atRisk,
     bands,
-    spendYtdEur: 48_200_000, // budget-tracked YTD spend (design figure, not the sum of supplier columns)
+    spendYtdEur: 238_000_000, // budget-tracked YTD spend (design figure, not the sum of supplier columns)
   }
 }
 
@@ -102,7 +102,7 @@ export function getKpis(suppliers: Supplier[]): Kpi[] {
     { label: 'Active suppliers', value: String(sum.total), delta: '+12', dir: 'up', note: 'vs. last quarter', to: '/app/suppliers' },
     { label: 'At-risk', value: String(sum.atRisk), delta: '+4', dir: 'down', note: 'needs attention', to: '/app/suppliers?band=Critical' },
     { label: 'Open NCRs', value: String(ncr.open), delta: '+6', dir: 'down', note: `${ncr.critical} critical · ${ncr.dueThisWeek} due this week`, to: '/app/ncrs' },
-    { label: 'Spend YTD', value: '48.2', unit: 'M€', delta: '+8.4%', dir: 'up', note: 'vs. budget', to: '/app/spend' },
+    { label: 'Spend YTD', value: '238', unit: 'M€', delta: '+5.2%', dir: 'up', note: 'vs. budget', to: '/app/spend' },
   ]
 }
 
@@ -164,11 +164,161 @@ export function getSpendBreakdown(all: Supplier[]): SpendBreakdown {
     .map((s) => ({ id: s.id, name: s.name, eur: s.spendEur, spend: s.spend }))
   return {
     totalEur: total,
-    ytdEur: 48_200_000,
-    budgetEur: 52_000_000,
+    ytdEur: 238_000_000,
+    budgetEur: 340_000_000,
     byCategory: groupBy((s) => s.category),
     bySegment: groupBy((s) => s.segment),
     topSuppliers,
+  }
+}
+
+// ── Concentration & dependency (Pareto / single-source) ─────────────────────
+export type ConcentrationPoint = { rank: number; id: string; name: string; sharePct: number; cumPct: number }
+export type SingleSource = { category: string; supplier: string; id: string; eur: number }
+export type Concentration = {
+  totalEur: number
+  top5Pct: number
+  top10Pct: number
+  pareto80N: number // suppliers needed to reach 80% of spend
+  hhi: number // Herfindahl index on percentage shares (0..10000)
+  singleSourceCount: number
+  singleSourceEur: number
+  singleSource: SingleSource[]
+  points: ConcentrationPoint[] // top-N, for the Pareto chart
+}
+
+// ── Recommendation engine ───────────────────────────────────────────────────
+export type ActionKind = 'dual-source' | 'de-risk' | 'renegotiate' | 'consolidate' | 'resolve-ncr'
+export type RecommendedAction = {
+  rank: number
+  id: string
+  kind: ActionKind
+  title: string
+  supplierId?: string
+  detail: string
+  riskDelta: number // risk-points this move removes (0 if none)
+  eurImpact: number // € saved or exposure removed (0 if none)
+  effort: 'Low' | 'Medium' | 'High'
+  urgency: 'This week' | 'This quarter' | 'This year'
+}
+
+const URGENCY_WEIGHT: Record<RecommendedAction['urgency'], number> = {
+  'This week': 30, 'This quarter': 15, 'This year': 5,
+}
+
+// The "so what / now what": derive a prioritised action plan from the portfolio.
+// Each move carries a quantified impact; ranking weights risk-points first (the
+// product's focus), then € impact, then urgency.
+export function getRecommendations(all: Supplier[], limit = 8): RecommendedAction[] {
+  const eurM = (eur: number) => `€${(eur / 1e6).toFixed(1)}M`
+  const con = getConcentration(all)
+  const singleIds = new Set(con.singleSource.map((s) => s.id))
+  const draft: Omit<RecommendedAction, 'rank'>[] = []
+
+  // 1) Dual-source the critical-risk suppliers — a second source caps the exposure.
+  for (const s of all.filter((x) => x.riskScore >= 75).sort((a, b) => b.riskScore - a.riskScore)) {
+    draft.push({
+      id: `dual-${s.id}`, kind: 'dual-source', title: `Dual-source ${s.name}`, supplierId: s.id,
+      detail: `Critical at risk ${s.riskScore}${s.reason ? ` — ${s.reason.toLowerCase()}` : ''}. A qualified second source caps the single-point exposure.`,
+      riskDelta: s.riskScore - 60, eurImpact: singleIds.has(s.id) ? s.spendEur : 0,
+      effort: 'Medium', urgency: 'This week',
+    })
+  }
+
+  // 2) De-risk the largest single-source dependencies not already flagged critical.
+  for (const ss of con.singleSource.filter((s) => !all.some((a) => a.id === s.id && a.riskScore >= 75)).slice(0, 2)) {
+    draft.push({
+      id: `derisk-${ss.id}`, kind: 'de-risk', title: `Qualify a 2nd source for ${ss.category}`, supplierId: ss.id,
+      detail: `${ss.supplier} is the only source — ${eurM(ss.eur)} hangs on one supplier. Qualify an alternative before the next disruption.`,
+      riskDelta: 0, eurImpact: ss.eur, effort: 'Medium', urgency: 'This quarter',
+    })
+  }
+
+  // 3) Renegotiate high-spend Strategic suppliers with rising risk.
+  for (const s of all.filter((x) => x.segment === 'Strategic' && x.change?.startsWith('+')).sort((a, b) => b.spendEur - a.spendEur).slice(0, 2)) {
+    draft.push({
+      id: `reneg-${s.id}`, kind: 'renegotiate', title: `Renegotiate ${s.name}`, supplierId: s.id,
+      detail: `Strategic, ${s.spend} spend, risk rising (${s.change}). Tie price to an SLA and a risk-improvement plan — ~5% is on the table.`,
+      riskDelta: 4, eurImpact: Math.round(s.spendEur * 0.05), effort: 'Low', urgency: 'This quarter',
+    })
+  }
+
+  // 4) Consolidate the Leverage quadrant — one aggregate sourcing play.
+  const leverage = all.filter((x) => x.segment === 'Leverage')
+  if (leverage.length > 0) {
+    const levSpend = leverage.reduce((sum, x) => sum + x.spendEur, 0)
+    draft.push({
+      id: 'consolidate-leverage', kind: 'consolidate', title: 'Tender & consolidate Leverage spend',
+      detail: `${leverage.length} low-risk Leverage suppliers carry ${eurM(levSpend)}. Competitive tender and consolidation typically returns ~8%.`,
+      riskDelta: 0, eurImpact: Math.round(levSpend * 0.08), effort: 'High', urgency: 'This year',
+    })
+  }
+
+  // 5) Clear open NCRs on high-risk suppliers — stop the quality drift.
+  for (const s of all.filter((x) => x.ncrs > 0 && x.riskScore >= 65).sort((a, b) => b.ncrs - a.ncrs).slice(0, 2)) {
+    draft.push({
+      id: `ncr-${s.id}`, kind: 'resolve-ncr', title: `Close the open NCR on ${s.name}`, supplierId: s.id,
+      detail: `${s.ncrs} open non-conformance${s.ncrs > 1 ? 's' : ''} at risk ${s.riskScore}. An 8D containment plan stops the quality drift feeding the score.`,
+      riskDelta: 6, eurImpact: 0, effort: 'Low', urgency: 'This week',
+    })
+  }
+
+  const maxEur = Math.max(...draft.map((a) => a.eurImpact), 1)
+  const scored = draft
+    .map((a) => ({ a, score: a.riskDelta + (a.eurImpact / maxEur) * 25 + URGENCY_WEIGHT[a.urgency] }))
+    .sort((x, y) => y.score - x.score)
+
+  // One move per supplier — a critical supplier shouldn't crowd the plan with
+  // three near-identical actions. Aggregate moves (no supplierId) always pass.
+  const seen = new Set<string>()
+  return scored
+    .filter(({ a }) => {
+      if (!a.supplierId) return true
+      if (seen.has(a.supplierId)) return false
+      seen.add(a.supplierId)
+      return true
+    })
+    .slice(0, limit)
+    .map(({ a }, i) => ({ ...a, rank: i + 1 }))
+}
+
+// The classic dependency analysis: how much spend sits with how few suppliers,
+// and which categories hang on a single source. Pure derivation from the seed.
+export function getConcentration(all: Supplier[], topN = 20): Concentration {
+  const sorted = [...all].sort((a, b) => b.spendEur - a.spendEur)
+  const total = sorted.reduce((sum, s) => sum + s.spendEur, 0) || 1
+
+  let cum = 0
+  let pareto80N = sorted.length
+  let reached80 = false
+  const points: ConcentrationPoint[] = []
+  sorted.forEach((s, i) => {
+    cum += s.spendEur
+    const cumPct = (cum / total) * 100
+    if (!reached80 && cumPct >= 80) { pareto80N = i + 1; reached80 = true }
+    if (i < topN) points.push({ rank: i + 1, id: s.id, name: s.name, sharePct: (s.spendEur / total) * 100, cumPct })
+  })
+
+  const cumAt = (n: number) => (sorted.slice(0, n).reduce((sum, s) => sum + s.spendEur, 0) / total) * 100
+  const hhi = Math.round(sorted.reduce((sum, s) => { const sh = (s.spendEur / total) * 100; return sum + sh * sh }, 0))
+
+  const byCat = new Map<string, Supplier[]>()
+  for (const s of all) { const a = byCat.get(s.category) ?? []; a.push(s); byCat.set(s.category, a) }
+  const single: SingleSource[] = [...byCat.entries()]
+    .filter(([, a]) => a.length === 1)
+    .map(([category, a]) => ({ category, supplier: a[0].name, id: a[0].id, eur: a[0].spendEur }))
+    .sort((a, b) => b.eur - a.eur)
+
+  return {
+    totalEur: total,
+    top5Pct: cumAt(5),
+    top10Pct: cumAt(10),
+    pareto80N,
+    hhi,
+    singleSourceCount: single.length,
+    singleSourceEur: single.reduce((sum, x) => sum + x.eur, 0),
+    singleSource: single.slice(0, 5),
+    points,
   }
 }
 

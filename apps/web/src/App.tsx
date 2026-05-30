@@ -13,6 +13,8 @@ import Contracts from './screens/Contracts'
 import Spend from './screens/Spend'
 import Esg from './screens/Esg'
 import Insights from './screens/Insights'
+import Actions from './screens/Actions'
+import Briefing from './screens/Briefing'
 import Showcase from './screens/Showcase'
 
 const Landing = lazy(() => import('./screens/Landing'))
@@ -56,6 +58,8 @@ export default function App() {
         <Route path="/app/categories/:key" element={<CategoryDetail />} />
         <Route path="/app/contracts" element={<Contracts />} />
         <Route path="/app/insights" element={<Insights />} />
+        <Route path="/app/actions" element={<Actions />} />
+        <Route path="/app/briefing" element={<Briefing />} />
         <Route path="/app/scorecards" element={<Scorecards />} />
         <Route path="/app/esg" element={<Esg />} />
         <Route path="/app/spend" element={<Spend />} />

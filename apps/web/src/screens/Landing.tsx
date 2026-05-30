@@ -2,6 +2,7 @@ import Hero from './landing/Hero'
 import Problem from './landing/Problem'
 import LensTabs from './landing/LensTabs'
 import RiskBandViz from './landing/RiskBandViz'
+import CaseLens from './landing/CaseLens'
 import Decisions from './landing/Decisions'
 import Cta from './landing/Cta'
 import Byline from './landing/Byline'
@@ -14,6 +15,7 @@ export default function Landing() {
       <Problem />
       <LensTabs />
       <RiskBandViz />
+      <CaseLens />
       <Decisions />
       <Cta />
       <Byline />

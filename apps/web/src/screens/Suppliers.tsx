@@ -48,6 +48,15 @@ const SEGMENT_SUB: Record<Segment, string> = {
   Routine: 'Low spend · Low risk',
 }
 
+// Kraljic's prescriptive layer: each quadrant maps to a sourcing strategy, not
+// just a description. This is the matrix's whole point — what to *do* per segment.
+const SEGMENT_STRATEGY: Record<Segment, { play: string; detail: string }> = {
+  Strategic: { play: 'Partner & develop', detail: 'Long-term partnerships, joint risk plans, dual-source the critical few.' },
+  Bottleneck: { play: 'Secure supply', detail: 'Guarantee volume, qualify alternatives, hold buffer stock.' },
+  Leverage: { play: 'Tender & negotiate', detail: 'Competitive bids, consolidate spend, use buying power.' },
+  Routine: { play: 'Automate & simplify', detail: 'E-catalogs, auto-reorder, cut transaction cost.' },
+}
+
 // ── Matrix view ─────────────────────────────────────────────────────────────
 // One compact, clickable row per supplier inside its segment column (kilde: V6MatrixCard).
 function MatrixRow({ s }: { s: Supplier }) {
@@ -73,6 +82,7 @@ function MatrixRow({ s }: { s: Supplier }) {
 // with the (possibly filtered) body — no separate exposure source to drift from.
 function MatrixColumn({ segment, rows }: { segment: Segment; rows: Supplier[] }) {
   const hue = SEGMENT_HUE[segment]
+  const strategy = SEGMENT_STRATEGY[segment]
   const count = rows.length
   const spendEur = rows.reduce((sum, r) => sum + r.spendEur, 0)
   const avgRisk = count ? Math.round(rows.reduce((sum, r) => sum + r.riskScore, 0) / count) : 0
@@ -90,6 +100,12 @@ function MatrixColumn({ segment, rows }: { segment: Segment; rows: Supplier[] })
           <span className="font-mono text-[10.5px] tabular-nums" style={{ color: riskColor(avgRisk) }}>
             avg {avgRisk}
           </span>
+        </div>
+        {/* Prescriptive Kraljic play — what to do with this quadrant, not just its label. */}
+        <div className="mt-3 rounded-md bg-paper-2 px-2.5 py-2" style={{ borderLeft: `3px solid ${hue}` }}>
+          <div className="font-mono text-[9px] uppercase tracking-[0.09em] text-ink-3">Recommended play</div>
+          <div className="mt-0.5 text-[12.5px] font-semibold leading-tight text-ink">{strategy.play}</div>
+          <div className="mt-1 text-[11px] leading-[1.45] text-ink-3">{strategy.detail}</div>
         </div>
       </div>
       {/* Column body — scrollable list, highest risk first. */}
@@ -117,7 +133,7 @@ function MatrixView({ suppliers }: { suppliers: Supplier[] }) {
         </h2>
         <p className="mt-1.5 max-w-[62ch] text-[13px] leading-[1.5] text-ink-2">
           Strategic and Bottleneck columns carry the conversations that matter — high risk where your
-          exposure is structural. Sorted within each column by current risk score.
+          exposure is structural. Each segment carries its recommended Kraljic play; rows sort by current risk.
         </p>
       </div>
       <div className="grid grid-cols-4 items-start gap-3.5">

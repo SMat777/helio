@@ -35,7 +35,26 @@ const NAME_A = ['Nordic', 'Apex', 'Vertex', 'Meridian', 'Atlas', 'Cobalt', 'Lume
 const NAME_B = ['Materials', 'Industries', 'Components', 'Group', 'Logistics', 'Polymers', 'Steel', 'Packaging', 'Sensors', 'Systems', 'Chemicals', 'Works', 'Supply', 'Partners', 'Trading']
 const NAME_SUFFIX = ['GmbH', 'AS', 'Ltd.', 'Inc.', 'SA', 'ApS', 'BV', 'AB', 'S.p.A', 'Co.']
 const COUNTRIES = ['DE', 'FR', 'GB', 'IT', 'ES', 'NL', 'SE', 'DK', 'NO', 'PL', 'CN', 'TW', 'VN', 'IN', 'US', 'CH', 'BE', 'AT', 'PT', 'CZ']
-const CATEGORIES = ['Packaging · Cardboard', 'Specialty Chemicals', 'Electronics · Sensors', 'Raw materials · Steel', 'Logistics · APAC', 'Logistics · EU', 'Machined parts', 'Adhesives & Sealants', 'Textiles', 'Plastics · Injection']
+// Core categories carry most suppliers; the specialty tail is sparse, so a few
+// land with a single supplier — the single-source exposure a real portfolio has.
+const CORE_CATEGORIES = [
+  'Packaging · Cardboard', 'Specialty Chemicals', 'Electronics · Sensors', 'Raw materials · Steel',
+  'Logistics · APAC', 'Logistics · EU', 'Machined parts', 'Adhesives & Sealants', 'Textiles',
+  'Plastics · Injection', 'Fasteners', 'Castings & Forgings', 'Electrical components', 'MRO supplies', 'Industrial gases',
+]
+const SPECIALTY_CATEGORIES = [
+  'Precision optics', 'Rare-earth magnets', 'Cleanroom consumables', 'Calibration services', 'Custom tooling',
+  'Cryogenic equipment', 'Ceramic substrates', 'RF connectors', 'Power semiconductors', 'Medical-grade polymers',
+  'Aerospace fasteners', 'Battery cells', 'Photonics modules', 'Heat exchangers', 'Seals · FFKM',
+  'Wire harnesses', 'Carbon fibre', 'Servo motors', 'Laser components', 'EMI shielding',
+  'Precision bearings', 'Thermal interface', 'Conformal coatings', 'Die-cast aluminium', 'Vibration dampers',
+]
+// Weighted pool: each core category appears 8×, each specialty once. Picking
+// uniformly from the pool makes core common and specialty rare.
+const CATEGORIES = [
+  ...CORE_CATEGORIES.flatMap((c) => Array<string>(8).fill(c)),
+  ...SPECIALTY_CATEGORIES,
+]
 const SEGMENTS: Segment[] = ['Strategic', 'Bottleneck', 'Leverage', 'Routine']
 
 let counter = 400
@@ -47,7 +66,9 @@ function makeSynthetic(count: number, lo: number, hi: number): Supplier[] {
     const onTimePct = Math.round((100 - riskScore * 0.18 - rnd() * 4) * 10) / 10
     const qualityPct = Math.min(99, Math.max(70, Math.round(98 - riskScore * 0.14 - rnd() * 5)))
     const ncrs = riskScore >= 65 ? (rnd() > 0.5 ? 1 : 2) : riskScore >= 45 ? (rnd() > 0.7 ? 1 : 0) : 0
-    const spendM = Math.round((0.2 + rnd() * 7) * 10) / 10
+    // Heavy-tailed spend (power 10) — most suppliers small, a few large, so the
+    // portfolio shows real concentration: ~30% of spend in the top 10 (lib/data Pareto).
+    const spendM = Math.round((0.2 + Math.pow(rnd(), 10) * 11) * 10) / 10
     const segment: Segment = pick(SEGMENTS)
     const tier: Tier = (rnd() > 0.6 ? 1 : rnd() > 0.4 ? 2 : 3) as Tier
     const id = `SUP-${counter++}`
