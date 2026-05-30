@@ -153,7 +153,79 @@
   border: 1px solid var(--ink);
   border-radius: 8px; overflow: hidden;
 }
-.lens-vis img { display: block; width: 100%; height: auto; }
+/* === LIVE LENS RENDERS (replace the static screenshots) === */
+.lens-render {
+  flex: 1; display: flex;
+  background: var(--paper-2);
+  padding: 16px; min-height: 340px;
+}
+
+/* Matrix — 2×2 Kraljic quadrants with risk-colored chips. */
+.lv-matrix {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px;
+}
+.lv-quad {
+  border: 1px solid var(--line); border-radius: 6px;
+  background: var(--card); padding: 11px 12px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.lv-quad-name { font-weight: 800; font-size: 14px; letter-spacing: -.01em; color: var(--ink); }
+.lv-quad-sub {
+  display: block; margin-top: 1px;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .03em;
+  color: var(--ink-3); text-transform: uppercase;
+}
+.lv-quad-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.lv-dot {
+  display: grid; place-content: center;
+  min-width: 30px; height: 26px; padding: 0 6px;
+  border-radius: 5px; font-size: 12.5px; font-weight: 700;
+}
+
+/* Table — header + rows; the risk score sits in its own badge cell. */
+.lv-table { flex: 1; display: flex; flex-direction: column; }
+.lv-thead, .lv-trow {
+  display: grid; grid-template-columns: 1.6fr 1fr .7fr .8fr;
+  align-items: center; gap: 8px;
+}
+.lv-thead {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3);
+  padding: 0 4px 8px; border-bottom: 2px solid var(--ink);
+}
+.lv-num-h { text-align: right; }
+.lv-trow { padding: 9px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.lv-trow:last-child { border-bottom: none; }
+.lv-name { display: flex; flex-direction: column; line-height: 1.2; font-weight: 700; color: var(--ink); }
+.lv-id { margin-top: 1px; font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: var(--ink-3); }
+.lv-cat { font-size: 12.5px; color: var(--ink-2); }
+.lv-badge {
+  display: inline-grid; place-content: center;
+  min-width: 32px; height: 24px; padding: 0 7px;
+  border-radius: 5px; font-size: 12.5px; font-weight: 700;
+}
+.lv-ontime { text-align: right; font-weight: 600; color: var(--ink-2); }
+
+/* Cards — 2×3 grid of supplier cards. */
+.lv-cards {
+  flex: 1; display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 9px; align-content: start;
+}
+.lv-card {
+  border: 1px solid var(--line); border-top: 3px solid var(--ink);
+  border-radius: 6px; background: var(--card);
+  padding: 11px 12px; display: flex; flex-direction: column; gap: 4px;
+}
+.lv-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.lv-card-name { font-size: 13px; font-weight: 700; line-height: 1.2; color: var(--ink); }
+.lv-card-score { font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.lv-card-meta { font-family: var(--font-mono); font-size: 10px; color: var(--ink-3); }
+.lv-card-seg {
+  align-self: flex-start; margin-top: 2px;
+  border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px;
+  font-size: 10.5px; font-weight: 700; color: var(--ink-2);
+}
 .lens-cap .lens-q {
   font-family: var(--font-mono);
   font-size: 11px; color: var(--cta);

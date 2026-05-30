@@ -1,26 +1,21 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
+import LensVisual from './LensVisual'
 
 type Lens = 'matrix' | 'table' | 'cards'
 
-const LENSES: Record<Lens, { label: string; image: string; alt: string; question: string; caption: string }> = {
+const LENSES: Record<Lens, { label: string; question: string; caption: string }> = {
   matrix: {
     label: 'Kraljic matrix',
-    image: '/screenshots/matrix-tight.png',
-    alt: 'Kraljic matrix showing supplier distribution across Strategic, Bottleneck, Leverage, Routine',
     question: 'Where does structural risk concentrate?',
     caption: 'Strategic and Bottleneck columns carry the structural risk. Within each column, suppliers sort by current score — high-risk floats to the top, ready for next week\'s review meeting.',
   },
   table: {
     label: 'Sortable table',
-    image: '/screenshots/table-tight.png',
-    alt: 'Sortable supplier table with columns for name, category, risk, on-time, quality',
     question: 'Which suppliers need attention this week?',
     caption: 'Sort by risk delta, on-time %, or quality 90D. Filter by category, region, or band.',
   },
   cards: {
     label: 'Visual cards',
-    image: '/screenshots/cards-tight.png',
-    alt: 'Supplier cards grid with color-coded risk indicators',
     question: 'Quick visual triage by category.',
     caption: 'Color-coded, scannable. Best for the daily standup or the contracts review.',
   },
@@ -79,7 +74,7 @@ export default function LensTabs() {
           {LENS_KEYS.map((key) => (
             <article key={key} className="lens-body lens-mobile" aria-labelledby={`mobile-lens-${key}`}>
               <figure className="lens-vis">
-                <img src={LENSES[key].image} alt={LENSES[key].alt} />
+                <LensVisual kind={key} />
               </figure>
               <div className="lens-cap">
                 <span className="lens-q">{LENSES[key].label}</span>
@@ -134,7 +129,7 @@ export default function LensTabs() {
         className="lens-body lens-active"
       >
         <figure className="lens-vis">
-          <img src={lens.image} alt={lens.alt} />
+          <LensVisual kind={active} />
         </figure>
         <div className="lens-cap">
           <span className="lens-q">What does this view answer?</span>
