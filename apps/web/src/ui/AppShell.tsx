@@ -21,6 +21,7 @@ const NAV: NavGroup[] = [
       { label: 'NCRs', to: '/app/ncrs', icon: 'warn', bad: 3 },
       { label: 'Insights', to: '/app/insights', icon: 'sparkle' },
       { label: 'Actions', to: '/app/actions', icon: 'check' },
+      { label: 'Briefing', to: '/app/briefing', icon: 'doc' },
     ],
   },
   {
