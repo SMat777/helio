@@ -91,7 +91,7 @@ export function getRiskSummary(all: Supplier[]): RiskSummary {
     total: all.length,
     atRisk,
     bands,
-    spendYtdEur: 48_200_000, // budget-tracked YTD spend (design figure, not the sum of supplier columns)
+    spendYtdEur: 238_000_000, // budget-tracked YTD spend (design figure, not the sum of supplier columns)
   }
 }
 
@@ -102,7 +102,7 @@ export function getKpis(suppliers: Supplier[]): Kpi[] {
     { label: 'Active suppliers', value: String(sum.total), delta: '+12', dir: 'up', note: 'vs. last quarter', to: '/app/suppliers' },
     { label: 'At-risk', value: String(sum.atRisk), delta: '+4', dir: 'down', note: 'needs attention', to: '/app/suppliers?band=Critical' },
     { label: 'Open NCRs', value: String(ncr.open), delta: '+6', dir: 'down', note: `${ncr.critical} critical · ${ncr.dueThisWeek} due this week`, to: '/app/ncrs' },
-    { label: 'Spend YTD', value: '48.2', unit: 'M€', delta: '+8.4%', dir: 'up', note: 'vs. budget', to: '/app/spend' },
+    { label: 'Spend YTD', value: '238', unit: 'M€', delta: '+5.2%', dir: 'up', note: 'vs. budget', to: '/app/spend' },
   ]
 }
 
@@ -164,11 +164,66 @@ export function getSpendBreakdown(all: Supplier[]): SpendBreakdown {
     .map((s) => ({ id: s.id, name: s.name, eur: s.spendEur, spend: s.spend }))
   return {
     totalEur: total,
-    ytdEur: 48_200_000,
-    budgetEur: 52_000_000,
+    ytdEur: 238_000_000,
+    budgetEur: 340_000_000,
     byCategory: groupBy((s) => s.category),
     bySegment: groupBy((s) => s.segment),
     topSuppliers,
+  }
+}
+
+// ── Concentration & dependency (Pareto / single-source) ─────────────────────
+export type ConcentrationPoint = { rank: number; id: string; name: string; sharePct: number; cumPct: number }
+export type SingleSource = { category: string; supplier: string; id: string; eur: number }
+export type Concentration = {
+  totalEur: number
+  top5Pct: number
+  top10Pct: number
+  pareto80N: number // suppliers needed to reach 80% of spend
+  hhi: number // Herfindahl index on percentage shares (0..10000)
+  singleSourceCount: number
+  singleSourceEur: number
+  singleSource: SingleSource[]
+  points: ConcentrationPoint[] // top-N, for the Pareto chart
+}
+
+// The classic dependency analysis: how much spend sits with how few suppliers,
+// and which categories hang on a single source. Pure derivation from the seed.
+export function getConcentration(all: Supplier[], topN = 20): Concentration {
+  const sorted = [...all].sort((a, b) => b.spendEur - a.spendEur)
+  const total = sorted.reduce((sum, s) => sum + s.spendEur, 0) || 1
+
+  let cum = 0
+  let pareto80N = sorted.length
+  let reached80 = false
+  const points: ConcentrationPoint[] = []
+  sorted.forEach((s, i) => {
+    cum += s.spendEur
+    const cumPct = (cum / total) * 100
+    if (!reached80 && cumPct >= 80) { pareto80N = i + 1; reached80 = true }
+    if (i < topN) points.push({ rank: i + 1, id: s.id, name: s.name, sharePct: (s.spendEur / total) * 100, cumPct })
+  })
+
+  const cumAt = (n: number) => (sorted.slice(0, n).reduce((sum, s) => sum + s.spendEur, 0) / total) * 100
+  const hhi = Math.round(sorted.reduce((sum, s) => { const sh = (s.spendEur / total) * 100; return sum + sh * sh }, 0))
+
+  const byCat = new Map<string, Supplier[]>()
+  for (const s of all) { const a = byCat.get(s.category) ?? []; a.push(s); byCat.set(s.category, a) }
+  const single: SingleSource[] = [...byCat.entries()]
+    .filter(([, a]) => a.length === 1)
+    .map(([category, a]) => ({ category, supplier: a[0].name, id: a[0].id, eur: a[0].spendEur }))
+    .sort((a, b) => b.eur - a.eur)
+
+  return {
+    totalEur: total,
+    top5Pct: cumAt(5),
+    top10Pct: cumAt(10),
+    pareto80N,
+    hhi,
+    singleSourceCount: single.length,
+    singleSourceEur: single.reduce((sum, x) => sum + x.eur, 0),
+    singleSource: single.slice(0, 5),
+    points,
   }
 }
 
