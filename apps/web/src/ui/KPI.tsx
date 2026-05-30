@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 
 export type KPIDir = 'up' | 'down' | 'flat'
 
@@ -9,7 +10,7 @@ const deltaColor: Record<KPIDir, string> = {
 }
 const deltaArrow: Record<KPIDir, string> = { up: '↑', down: '↓', flat: '→' }
 
-export function KPI({ label, value, unit, delta, dir = 'flat', note, hero = false }: {
+export function KPI({ label, value, unit, delta, dir = 'flat', note, hero = false, to }: {
   label: ReactNode
   value: ReactNode
   unit?: string
@@ -17,11 +18,15 @@ export function KPI({ label, value, unit, delta, dir = 'flat', note, hero = fals
   dir?: KPIDir
   note?: ReactNode
   hero?: boolean
+  to?: string
 }) {
-  return (
-    <div className="px-4 pt-3.5 pb-4">
+  const inner = (
+    <>
       <div className="mb-2 flex justify-between font-mono text-[11.5px] uppercase tracking-[0.06em] text-ink-3">
-        <span>{label}</span>
+        <span className="flex items-center gap-1">
+          {label}
+          {to && <span className="text-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true">→</span>}
+        </span>
         {note && <span>{note}</span>}
       </div>
       <div
@@ -44,6 +49,15 @@ export function KPI({ label, value, unit, delta, dir = 'flat', note, hero = fals
           {delta}
         </div>
       )}
-    </div>
+    </>
   )
+
+  if (to) {
+    return (
+      <Link to={to} className="group block px-4 pt-3.5 pb-4 text-ink no-underline transition-colors hover:bg-hover">
+        {inner}
+      </Link>
+    )
+  }
+  return <div className="px-4 pt-3.5 pb-4">{inner}</div>
 }

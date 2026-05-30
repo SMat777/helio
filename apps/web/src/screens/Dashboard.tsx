@@ -67,7 +67,7 @@ export default function Dashboard() {
         <Card flat className="mb-3 grid grid-cols-4">
           {kpis.map((k, i) => (
             <div key={k.label} className={i < 3 ? 'border-r border-line' : ''}>
-              <KPI label={k.label} value={k.value} unit={k.unit} delta={k.delta} dir={k.dir as KPIDir} note={k.note} />
+              <KPI label={k.label} value={k.value} unit={k.unit} delta={k.delta} dir={k.dir as KPIDir} note={k.note} to={k.to} />
             </div>
           ))}
         </Card>
@@ -81,7 +81,7 @@ export default function Dashboard() {
             </div>
             <div className="mt-2 text-[13px] text-ink-3">Across {summary.total} active suppliers.</div>
           </div>
-          <RiskBand bands={summary.bands} compact />
+          <RiskBand bands={summary.bands} compact bandHref={(label) => `/app/suppliers?band=${label}`} />
         </Card>
 
         {/* Needs attention + activity */}

@@ -28,6 +28,7 @@ export type Kpi = {
   delta: string
   dir: 'up' | 'down' | 'flat'
   note: string
+  to?: string // drill-down target when the tile is clickable
 }
 
 export type BandRow = { label: string; range: string; n: number; color: string }
@@ -98,10 +99,10 @@ export function getKpis(suppliers: Supplier[]): Kpi[] {
   const sum = getRiskSummary(suppliers)
   const ncr = getNcrSummary()
   return [
-    { label: 'Active suppliers', value: String(sum.total), delta: '+12', dir: 'up', note: 'vs. last quarter' },
-    { label: 'At-risk', value: String(sum.atRisk), delta: '+4', dir: 'down', note: 'needs attention' },
-    { label: 'Open NCRs', value: String(ncr.open), delta: '+6', dir: 'down', note: `${ncr.critical} critical · ${ncr.dueThisWeek} due this week` },
-    { label: 'Spend YTD', value: '48.2', unit: 'M€', delta: '+8.4%', dir: 'up', note: 'vs. budget' },
+    { label: 'Active suppliers', value: String(sum.total), delta: '+12', dir: 'up', note: 'vs. last quarter', to: '/app/suppliers' },
+    { label: 'At-risk', value: String(sum.atRisk), delta: '+4', dir: 'down', note: 'needs attention', to: '/app/suppliers?band=Critical' },
+    { label: 'Open NCRs', value: String(ncr.open), delta: '+6', dir: 'down', note: `${ncr.critical} critical · ${ncr.dueThisWeek} due this week`, to: '/app/ncrs' },
+    { label: 'Spend YTD', value: '48.2', unit: 'M€', delta: '+8.4%', dir: 'up', note: 'vs. budget', to: '/app/spend' },
   ]
 }
 
