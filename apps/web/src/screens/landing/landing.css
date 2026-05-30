@@ -169,77 +169,112 @@
 /* === RISK === */
 .risk { padding-bottom: 60px; }
 
-/* 3-column grid: [band-ladder + chart-axis] | Strategic touchpoint | Table cell badge.
-   align-items: stretch makes the touchpoint columns match the left stack height. */
-.risk-viz {
+/* Live playground: band-ladder on the left, threshold control + portfolio cloud
+   on the right. align-items: stretch makes the ladder match the live column. */
+.risk-board {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 18px;
+  grid-template-columns: 1fr 1.45fr;
+  gap: 22px;
   align-items: stretch;
   margin-top: 18px;
 }
-
-/* LEFT column: band-ladder on top, chart-axis mini-card below. */
-.risk-left {
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: 12px;
+.risk-live {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .risk-ladder {
-  list-style: none; display: grid; gap: 0;
+  list-style: none; display: flex; flex-direction: column;
   border-radius: 8px; overflow: hidden;
   border: 1px solid var(--ink);
 }
 .risk-ladder li {
-  padding: 16px 20px;
+  flex: 1; padding: 16px 20px;
   display: flex; justify-content: space-between; align-items: center;
 }
 .band-label { font-weight: 800; font-size: 16px; letter-spacing: -.01em; }
-.band-range { font-family: var(--font-mono); font-size: 13px; opacity: .9; }
+.band-range { font-size: 13px; opacity: .92; font-weight: 600; }
 
-/* Chart-axis card — tucked under the ladder, contained crop. */
-.risk-chart {
+/* Threshold control — the one interactive line. */
+.risk-control {
   border: 1px solid var(--ink); border-radius: 8px;
   background: var(--paper-2);
-  padding: 10px;
-  display: grid; gap: 8px;
+  padding: 16px 18px;
 }
-.risk-chart img {
-  display: block; width: 100%; height: auto;
-  max-height: 140px; object-fit: cover; object-position: center top;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  background: var(--card);
+.risk-control-top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; cursor: pointer;
 }
-.risk-chart figcaption {
-  font-size: 13px; font-weight: 700; color: var(--ink);
-  text-align: center;
+.risk-control-label {
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-2);
+}
+.risk-control-val {
+  font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.02em;
+}
+.risk-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; margin: 14px 0 10px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--good), var(--warn), var(--bad));
+  cursor: pointer;
+}
+.risk-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--card); border: 3px solid var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer;
+}
+.risk-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--card); border: 3px solid var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer;
+}
+.risk-control-hint {
+  font-size: 12.5px; color: var(--ink-3); letter-spacing: .01em;
 }
 
-/* Touchpoint columns (Strategic + Table cell badge) — image fills the rest of
-   the column without driving its height (flex with min-height:0 + flex:1 on img). */
-.risk-touch {
-  border: 1px solid var(--ink); border-radius: 8px;
-  background: var(--card);
-  padding: 10px;
-  display: flex; flex-direction: column;
-  gap: 8px;
-  overflow: hidden;
-  min-height: 0;
+/* Portfolio cloud — each chip is a supplier score; recolors as the line moves. */
+.risk-cloud {
+  list-style: none; flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  gap: 6px;
 }
-.risk-touch img {
-  flex: 1 1 0;
-  width: 100%; min-height: 0;
-  object-fit: cover; object-position: center top;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  display: block;
+.risk-chip {
+  display: grid; place-content: center;
+  aspect-ratio: 1 / 1; border-radius: 6px;
+  font-size: 14px; font-weight: 700;
+  border: 1px solid rgba(0,0,0,.12);
+  transition: background-color .25s ease, color .25s ease;
 }
-.risk-touch figcaption {
-  flex: 0 0 auto;
-  font-size: 13px; font-weight: 700; color: var(--ink);
-  text-align: center;
+@media (prefers-reduced-motion: reduce) {
+  .risk-chip { transition: none; }
+}
+
+/* Live band counts. */
+.risk-counts {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin: 0;
+}
+.risk-count {
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--card); padding: 10px 12px;
+}
+.risk-count dt {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 700; color: var(--ink-2);
+}
+.risk-count-dot {
+  width: 10px; height: 10px; border-radius: 3px;
+  flex: none; border: 1px solid rgba(0,0,0,.15);
+}
+.risk-count-n {
+  font-size: 24px; font-weight: 800; line-height: 1;
+  margin-top: 4px; color: var(--ink);
 }
 
 /* Bottom strip — tag-line and pills sit edge-to-edge across the grid width. */
@@ -367,10 +402,9 @@
   }
   .lens-body.lens-mobile:last-child { border-bottom: none; }
 
-  /* Risk — show only 2 of 4 touchpoints on mobile (spec §03 §4) */
-  .risk-viz { grid-template-columns: 1fr; }
-  .risk-touch { grid-template-columns: 1fr; }
-  .risk-touch li:nth-child(n+3) { display: none; }
+  /* Risk — stack the ladder over the live playground on narrow screens. */
+  .risk-board { grid-template-columns: 1fr; }
+  .risk-counts { grid-template-columns: 1fr 1fr; }
 
   /* Decisions — native <details> accordion. Start collapsed on mobile;
      desktop forces them open via the `open` attribute on the element. */
