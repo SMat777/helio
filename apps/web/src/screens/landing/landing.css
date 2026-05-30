@@ -378,6 +378,36 @@
   background: var(--card);
 }
 
+/* === CASE LENS === */
+.case { padding-bottom: 60px; }
+.case-arc {
+  list-style: none; display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 0;
+  border: 1px solid var(--ink); border-radius: 8px; overflow: hidden;
+  margin-top: 18px;
+}
+.case-step {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 20px 22px; background: var(--card);
+  border-right: 1px solid var(--line);
+}
+.case-step:last-child { border-right: none; }
+.case-no { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--cta); }
+.case-step h3 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+.case-q { font-size: 13.5px; font-weight: 700; line-height: 1.4; color: var(--accent); }
+.case-a { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.case-cta {
+  display: inline-block; margin-top: 20px;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  color: var(--cta); text-decoration: none;
+}
+.case-cta:hover { text-decoration: underline; }
+@media (max-width: 768px) {
+  .case-arc { grid-template-columns: 1fr; }
+  .case-step { border-right: none; border-bottom: 1px solid var(--line); }
+  .case-step:last-child { border-bottom: none; }
+}
+
 /* === DECISIONS === */
 .decisions { padding-bottom: 60px; }
 .accent-blue { color: var(--accent); }
