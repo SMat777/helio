@@ -120,7 +120,7 @@ export default function Esg() {
                 return (
                   <Tr key={x.supplierId}>
                     <Td variant="name" className="p-0">
-                      <Link to={`/suppliers/${x.supplierId}`} className="block px-3 py-2.5 text-ink no-underline">
+                      <Link to={`/app/suppliers/${x.supplierId}`} className="block px-3 py-2.5 text-ink no-underline">
                         <span className="text-[14.5px] font-semibold">{s?.name ?? x.supplierId}</span>
                         <span className="mt-0.5 block font-mono text-[12px] font-normal text-ink-3">{x.supplierId}</span>
                       </Link>

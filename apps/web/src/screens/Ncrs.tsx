@@ -43,7 +43,7 @@ export default function Ncrs() {
       slim
       crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; NCRs</>}
       actions={
-        <Link to="/ncr/new" className="no-underline">
+        <Link to="/app/ncr/new" className="no-underline">
           <Button variant="primary"><Icon name="plus" /> New NCR</Button>
         </Link>
       }
@@ -75,7 +75,7 @@ export default function Ncrs() {
                 return (
                   <Tr key={n.id}>
                     <Td variant="name" className="p-0">
-                      <Link to={`/suppliers/${n.supplierId}`} className="block px-3 py-3 no-underline">
+                      <Link to={`/app/suppliers/${n.supplierId}`} className="block px-3 py-3 no-underline">
                         <span className="text-[15.5px] font-semibold leading-tight text-ink">{n.title}</span>
                         <span className="mt-1 block font-mono text-[12px] font-normal text-ink-3">{n.id}</span>
                       </Link>

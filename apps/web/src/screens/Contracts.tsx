@@ -63,7 +63,7 @@ export default function Contracts() {
                 return (
                   <Tr key={c.id}>
                     <Td variant="name" className="p-0">
-                      <Link to={`/suppliers/${c.supplierId}`} className="block px-3 py-[9px] text-ink no-underline">
+                      <Link to={`/app/suppliers/${c.supplierId}`} className="block px-3 py-[9px] text-ink no-underline">
                         {c.title}
                         <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{c.id}</span>
                       </Link>

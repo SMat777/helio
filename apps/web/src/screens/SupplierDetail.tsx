@@ -251,7 +251,7 @@ function NotFound() {
   return (
     <AppShell
       slim
-      crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; not found</>}
+      crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/app/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; not found</>}
     >
       <div className="px-6 py-4">
         <Card flat className="grid min-h-[260px] place-items-center px-6 py-16">
@@ -261,7 +261,7 @@ function NotFound() {
             </div>
             <div className="font-serif text-[22px] leading-tight tracking-[-0.015em]">Supplier not found</div>
             <div className="mt-1.5 text-[12.5px] text-ink-2">We couldn't find a supplier with that id.</div>
-            <Link to="/suppliers" className="mt-5 inline-flex items-center gap-1.5 rounded-md border border-line bg-card px-2.5 py-1.5 text-[12.5px] font-medium text-ink no-underline hover:bg-hover">
+            <Link to="/app/suppliers" className="mt-5 inline-flex items-center gap-1.5 rounded-md border border-line bg-card px-2.5 py-1.5 text-[12.5px] font-medium text-ink no-underline hover:bg-hover">
               <Icon name="back" /> Back to suppliers
             </Link>
           </div>
@@ -494,7 +494,7 @@ export default function SupplierDetail() {
   // (e.g. just added) isn't here yet — wait for the real fetch before NotFound.
   if (isPlaceholderData && !supplier) {
     return (
-      <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link></>}>
+      <AppShell slim crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/app/suppliers" className="text-accent no-underline">Suppliers</Link></>}>
         <div className="grid place-items-center py-32 font-mono text-[12.5px] text-ink-3">Loading supplier…</div>
       </AppShell>
     )
@@ -520,11 +520,11 @@ export default function SupplierDetail() {
   return (
     <AppShell
       slim
-      crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; {s.id}</>}
+      crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; <Link to="/app/suppliers" className="text-accent no-underline">Suppliers</Link> &nbsp;/&nbsp; {s.id}</>}
       actions={
         <>
           <Button onClick={() => exportSupplier(s)}><Icon name="export" /> Export</Button>
-          <Link to="/ncr/new" className="no-underline">
+          <Link to="/app/ncr/new" className="no-underline">
             <Button variant="primary">Open NCR</Button>
           </Link>
         </>
@@ -532,7 +532,7 @@ export default function SupplierDetail() {
     >
       <div className="px-6 py-4">
         {/* Back link */}
-        <Link to="/suppliers" className="mb-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-ink-3 no-underline hover:text-ink">
+        <Link to="/app/suppliers" className="mb-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-ink-3 no-underline hover:text-ink">
           <Icon name="back" size={13} /> Back to suppliers
         </Link>
 

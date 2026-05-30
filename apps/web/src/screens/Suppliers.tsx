@@ -54,7 +54,7 @@ function MatrixRow({ s }: { s: Supplier }) {
   const color = riskColor(s.riskScore)
   return (
     <Link
-      to={`/suppliers/${s.id}`}
+      to={`/app/suppliers/${s.id}`}
       className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-[7px] border border-line bg-card px-3 py-2 no-underline"
       style={{ borderLeft: `2px solid ${color}` }}
     >
@@ -158,7 +158,7 @@ function TableView({ suppliers }: { suppliers: Supplier[] }) {
           {rows.map((s) => (
             <Tr key={s.id}>
               <Td variant="name" className="p-0">
-                <Link to={`/suppliers/${s.id}`} className="block px-3 py-[9px] text-ink no-underline">
+                <Link to={`/app/suppliers/${s.id}`} className="block px-3 py-[9px] text-ink no-underline">
                   {s.name}
                   <span className="mt-0.5 block font-mono text-[11px] font-normal text-ink-3">{s.id} · Tier {s.tier}</span>
                 </Link>
@@ -193,7 +193,7 @@ function TableView({ suppliers }: { suppliers: Supplier[] }) {
 function SupplierCard({ s }: { s: Supplier }) {
   const color = riskColor(s.riskScore)
   return (
-    <Link to={`/suppliers/${s.id}`} className="block no-underline">
+    <Link to={`/app/suppliers/${s.id}`} className="block no-underline">
       <Card className="flex h-full flex-col px-4 py-4" style={{ borderLeft: `2px solid ${color}` }}>
         {/* Header */}
         <div className="mb-2 flex items-start justify-between gap-2.5">
@@ -319,7 +319,7 @@ export default function Suppliers() {
       actions={
         <>
           <Button onClick={exportCsv}><Icon name="export" /> Export CSV</Button>
-          <Button variant="primary" onClick={() => navigate('/suppliers/new')}><Icon name="plus" /> Add supplier</Button>
+          <Button variant="primary" onClick={() => navigate('/app/suppliers/new')}><Icon name="plus" /> Add supplier</Button>
         </>
       }
     >

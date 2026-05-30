@@ -83,7 +83,7 @@ export default function Spend() {
               {data.topSuppliers.map((s) => (
                 <Tr key={s.id}>
                   <Td variant="name" className="p-0">
-                    <Link to={`/suppliers/${s.id}`} className="block px-3 py-2.5 text-ink no-underline">
+                    <Link to={`/app/suppliers/${s.id}`} className="block px-3 py-2.5 text-ink no-underline">
                       <span className="text-[14.5px] font-semibold">{s.name}</span>
                       <span className="mt-0.5 block font-mono text-[12px] font-normal text-ink-3">{s.id}</span>
                     </Link>

@@ -53,7 +53,7 @@ export default function Categories() {
               {rows.map((r) => {
                 const color = riskColor(r.avgRisk)
                 return (
-                  <Tr key={r.category} onClick={() => navigate(`/categories/${encodeURIComponent(r.category)}`)}>
+                  <Tr key={r.category} onClick={() => navigate(`/app/categories/${encodeURIComponent(r.category)}`)}>
                     <Td variant="name">{r.category}</Td>
                     <Td variant="num">{r.count}</Td>
                     <Td>

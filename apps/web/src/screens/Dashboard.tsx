@@ -15,7 +15,7 @@ function StoryCard({ s }: { s: Supplier }) {
   const color = riskColor(s.riskScore)
   return (
     <Link
-      to={`/suppliers/${s.id}`}
+      to={`/app/suppliers/${s.id}`}
       className="flex min-h-[60px] flex-col justify-center rounded-lg border border-line bg-paper px-3.5 py-3 no-underline"
       style={{ borderLeft: `2px solid ${color}` }}
     >
@@ -57,8 +57,8 @@ export default function Dashboard() {
       crumb={<><b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp; Dashboard &nbsp;·&nbsp; <span className="text-ink-3">May 23</span></>}
       actions={
         <>
-          <Button onClick={() => navigate('/insights')}><Icon name="sparkle" /> Insights</Button>
-          <Button variant="primary" onClick={() => navigate('/suppliers/new')}><Icon name="plus" /> Add supplier</Button>
+          <Button onClick={() => navigate('/app/insights')}><Icon name="sparkle" /> Insights</Button>
+          <Button variant="primary" onClick={() => navigate('/app/suppliers/new')}><Icon name="plus" /> Add supplier</Button>
         </>
       }
     >
@@ -91,7 +91,7 @@ export default function Dashboard() {
               <h3 className="m-0 text-[15px] font-semibold tracking-[-0.005em]">
                 Needs attention <span className="ml-2 font-mono text-[12px] font-normal text-ink-3">{needs.length} of {summary.atRisk}</span>
               </h3>
-              <Link to="/suppliers" className="font-mono text-[12px] text-accent no-underline hover:underline">view all →</Link>
+              <Link to="/app/suppliers" className="font-mono text-[12px] text-accent no-underline hover:underline">view all →</Link>
             </div>
             <div className="grid auto-rows-fr grid-cols-2 gap-2">
               {needs.map((s) => <StoryCard key={s.id} s={s} />)}

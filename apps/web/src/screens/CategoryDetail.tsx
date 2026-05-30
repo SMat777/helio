@@ -48,7 +48,7 @@ export default function CategoryDetail() {
   const crumb = (
     <>
       <b className="font-medium text-ink">Workspace</b> &nbsp;/&nbsp;{' '}
-      <Link to="/categories" className="text-accent no-underline hover:underline">Categories</Link> &nbsp;/&nbsp;{' '}
+      <Link to="/app/categories" className="text-accent no-underline hover:underline">Categories</Link> &nbsp;/&nbsp;{' '}
       <span className="text-ink-3">{category}</span>
     </>
   )
@@ -59,7 +59,7 @@ export default function CategoryDetail() {
         <div className="grid place-items-center px-6 py-24 text-center">
           <div>
             <div className="font-serif text-[22px] tracking-[-0.015em]">No suppliers in this category</div>
-            <Link to="/categories" className="mt-4 inline-block font-mono text-[13px] text-accent no-underline hover:underline">← Back to categories</Link>
+            <Link to="/app/categories" className="mt-4 inline-block font-mono text-[13px] text-accent no-underline hover:underline">← Back to categories</Link>
           </div>
         </div>
       </AppShell>
@@ -99,7 +99,7 @@ export default function CategoryDetail() {
             </THead>
             <TBody>
               {rows.map((s) => (
-                <Tr key={s.id} onClick={() => navigate(`/suppliers/${s.id}`)}>
+                <Tr key={s.id} onClick={() => navigate(`/app/suppliers/${s.id}`)}>
                   <Td variant="name">
                     {s.name}
                     <span className="mt-0.5 block font-mono text-[12px] font-normal text-ink-3">{s.id} · Tier {s.tier}</span>
@@ -122,7 +122,7 @@ export default function CategoryDetail() {
         </Card>
 
         <div className="mt-4">
-          <button onClick={() => navigate('/categories')} className="inline-flex items-center gap-1.5 font-mono text-[13px] text-accent hover:underline">
+          <button onClick={() => navigate('/app/categories')} className="inline-flex items-center gap-1.5 font-mono text-[13px] text-accent hover:underline">
             <Icon name="back" size={13} /> Back to categories
           </button>
         </div>

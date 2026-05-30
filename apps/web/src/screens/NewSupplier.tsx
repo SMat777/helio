@@ -100,7 +100,7 @@ export function NewSupplier() {
       spendEur,
       trend: makeTrend(scorecard),
     }
-    addMut.mutate(supplier, { onSuccess: () => navigate(`/suppliers/${id}`) })
+    addMut.mutate(supplier, { onSuccess: () => navigate(`/app/suppliers/${id}`) })
   }
 
   return (
@@ -113,7 +113,7 @@ export function NewSupplier() {
       }
       actions={
         <>
-          <Button variant="ghost" onClick={() => navigate('/suppliers')}>Cancel</Button>
+          <Button variant="ghost" onClick={() => navigate('/app/suppliers')}>Cancel</Button>
           <Button variant="primary" onClick={create}>
             <Icon name="plus" /> Create supplier
           </Button>
